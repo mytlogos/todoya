@@ -52,7 +52,7 @@
                     @click.left="
                         selectedProject.id === project
                             ? 0
-                            : (selectedProject = project)
+                            : (selectedProject = project.id)
                     "
                     href="#"
                     class="list-group-item list-group-item-action"
