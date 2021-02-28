@@ -44,20 +44,20 @@
             <ul class="list-group list-group-flush">
                 <a
                     v-for="project in projects"
-                    :key="project"
-                    :class="{ active: project === selectedProject }"
+                    :key="project.id"
+                    :class="{ active: project.id === selectedProject }"
                     :aria-current="
-                        project === selectedProject ? 'true' : 'false'
+                        project.id === selectedProject ? 'true' : 'false'
                     "
                     @click.left="
-                        selectedProject === project
-                            ? ''
+                        selectedProject.id === project
+                            ? 0
                             : (selectedProject = project)
                     "
                     href="#"
                     class="list-group-item list-group-item-action"
                 >
-                    {{ project }}
+                    {{ project.title }}
                 </a>
             </ul>
         </div>
@@ -68,6 +68,7 @@
 </template>
 
 <script lang="ts">
+import { Project } from "@/client";
 import { defineComponent } from "vue";
 
 export default defineComponent({
@@ -75,18 +76,12 @@ export default defineComponent({
     data() {
         return {
             selectedView: "",
-            selectedProject: ""
+            selectedProject: 0
         };
     },
     computed: {
-        projects(): string[] {
-            return [
-                "An Item",
-                "A second Item",
-                "A third item",
-                "A fourth Item",
-                "And a fith one"
-            ];
+        projects(): Project[] {
+            return this.$store.state.projects;
         }
     }
 });

@@ -10,13 +10,12 @@
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
-                    <router-link
-                        to="/"
-                        tag="a"
-                        class="nav-link"
+                    <a
+                        class="nav-link btn"
+                        @click.left="showAddProject = true"
                     >
                         Add Project
-                    </router-link>
+                    </a>
                 </li>
                 <li class="nav-item">
                     <router-link
@@ -30,13 +29,23 @@
             </ul>
         </div>
     </nav>
+    <teleport to="body">
+        <add-project :show="showAddProject" @close="showAddProject = false"/>
+    </teleport>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import addProject from "./modals/add-project.vue";
 
 export default defineComponent({
-    name: "AppHeader"
+    components: { addProject },
+    name: "AppHeader",
+    data() {
+        return {
+            showAddProject: false
+        };
+    },
 });
 </script>
 

@@ -107,17 +107,23 @@ const api = {
     },
 };
 
-export interface Project {
+export type Create<T> = Exclude<T, keyof Entity>;
+
+export interface Entity {
+    id: number;
+}
+
+export interface Project extends Entity {
     title: string;
     parent?: number;
 }
 
-export interface Board {
+export interface Board extends Entity {
     title: string;
     project?: number;
 }
 
-export interface Task {
+export interface Task extends Entity {
     title: string;
     start: Date | string;
     due: Date | string;
@@ -128,7 +134,7 @@ export interface Task {
     project: number;
 }
 
-export interface Category {
+export interface Category extends Entity {
     title: string;
 }
 
