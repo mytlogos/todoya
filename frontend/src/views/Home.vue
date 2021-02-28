@@ -1,18 +1,100 @@
 <template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png" />
-    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App" />
-  </div>
+    <div class="d-flex">
+        <div class="left-sidebar">
+            <div class="m-2">Views</div>
+            <ul class="list-group list-group-flush">
+                <router-link
+                    class="list-group-item list-group-item-action"
+                    :to="{ name: 'ListView' }"
+                    tag="a"
+                    >Today</router-link
+                >
+                <router-link
+                    class="list-group-item list-group-item-action"
+                    :to="{ name: 'ListView' }"
+                    tag="a"
+                    >Tomorrow</router-link
+                >
+                <router-link
+                    class="list-group-item list-group-item-action"
+                    :to="{ name: 'ListView' }"
+                    tag="a"
+                    >Next Week</router-link
+                >
+                <router-link
+                    class="list-group-item list-group-item-action"
+                    :to="{ name: 'ListView' }"
+                    tag="a"
+                    >All</router-link
+                >
+                <router-link
+                    class="list-group-item list-group-item-action"
+                    :to="{ name: 'Calendar' }"
+                    tag="a"
+                    >Calendar</router-link
+                >
+                <router-link
+                    class="list-group-item list-group-item-action"
+                    :to="{ name: 'Board' }"
+                    tag="a"
+                    >Board</router-link
+                >
+            </ul>
+            <div class="m-2">Projects</div>
+            <ul class="list-group list-group-flush">
+                <a
+                    v-for="project in projects"
+                    :key="project"
+                    :class="{ active: project === selectedProject }"
+                    :aria-current="
+                        project === selectedProject ? 'true' : 'false'
+                    "
+                    @click.left="
+                        selectedProject === project
+                            ? ''
+                            : (selectedProject = project)
+                    "
+                    href="#"
+                    class="list-group-item list-group-item-action"
+                >
+                    {{ project }}
+                </a>
+            </ul>
+        </div>
+        <div class="bg-light flex-fill">
+            <router-view />
+        </div>
+    </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import HelloWorld from "@/components/HelloWorld.vue"; // @ is an alias to /src
 
 export default defineComponent({
-  name: "Home",
-  components: {
-    HelloWorld
-  }
+    name: "Home",
+    data() {
+        return {
+            selectedView: "",
+            selectedProject: ""
+        };
+    },
+    computed: {
+        projects(): string[] {
+            return [
+                "An Item",
+                "A second Item",
+                "A third item",
+                "A fourth Item",
+                "And a fith one"
+            ];
+        }
+    }
 });
 </script>
+<style scoped>
+.left-sidebar {
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+    width: 10vw;
+    overflow-y: auto;
+}
+</style>
