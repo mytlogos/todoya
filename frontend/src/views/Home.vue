@@ -45,15 +45,11 @@
                 <a
                     v-for="project in projects"
                     :key="project.id"
-                    :class="{ active: project.id === selectedProject }"
+                    :class="{ active: selectedProjects.includes(project.id) }"
                     :aria-current="
-                        project.id === selectedProject ? 'true' : 'false'
+                        selectedProjects.includes(project.id) ? 'true' : 'false'
                     "
-                    @click.left="
-                        selectedProject.id === project
-                            ? 0
-                            : (selectedProject = project.id)
-                    "
+                    @click.left="toggle(project)"
                     href="#"
                     class="list-group-item list-group-item-action"
                 >
@@ -70,18 +66,21 @@
 <script lang="ts">
 import { Project } from "@/client";
 import { defineComponent } from "vue";
+import { mapState } from "vuex";
 
 export default defineComponent({
     name: "Home",
     data() {
         return {
-            selectedView: "",
-            selectedProject: 0
+            selectedView: ""
         };
     },
     computed: {
-        projects(): Project[] {
-            return this.$store.state.projects;
+        ...mapState(["projects", "selectedProjects"])
+    },
+    methods: {
+        toggle(project: Project) {
+            this.$store.commit("toggleProjectSelect", project);
         }
     }
 });

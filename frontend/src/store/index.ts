@@ -25,6 +25,7 @@ export default createStore({
     projects: [],
     boards: [],
     tasks: [],
+    selectedProjects: []
   }),
   mutations: {
     setProject(state, projects: Project[]) {
@@ -35,6 +36,15 @@ export default createStore({
     },
     removeProject(state, project: Project) {
       remove(state.boards, project);
+    },
+    toggleProjectSelect(state, project: Project) {
+      const index = state.selectedProjects.indexOf(project.id);
+
+      if (index < 0) {
+          state.selectedProjects.push(project.id);
+      } else {
+          state.selectedProjects.splice(index, 1);
+      }
     },
     setTasks(state, tasks: Task[]) {
       state.tasks = tasks;

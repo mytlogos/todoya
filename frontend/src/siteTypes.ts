@@ -4,4 +4,5 @@ export interface VuexStore {
     projects: Project[];
     boards: Board[];
     tasks: Task[];
+    selectedProjects: number[];
 }
