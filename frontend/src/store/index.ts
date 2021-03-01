@@ -28,8 +28,8 @@ export default createStore({
     selectedProjects: []
   }),
   getters: {
-    getBoards: (state) => (id: number): Board[] => {
-      return state.boards.filter(value => value.project === id);
+    getBoards: (state) => (projectId: number): Board[] => {
+      return state.boards.filter(value => value.project === projectId);
     },
     getBoardTasks: (state) => (id: number): Board[] => {
       return state.tasks.filter(value => value.board === id);
@@ -40,6 +40,9 @@ export default createStore({
     },
     getProject: (state) => (id: number): undefined | Project => {
       return state.projects.find(value => id === value.id);
+    },
+    getBoard: (state) => (id: number): undefined | Board => {
+      return state.boards.find(value => id === value.id);
     },
   },
   mutations: {

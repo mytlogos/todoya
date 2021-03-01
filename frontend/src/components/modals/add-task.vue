@@ -4,6 +4,7 @@
         :show="show"
         @submit="submitted"
         @close="$emit('close')"
+        @keyup.enter.ctrl="submitted"
     >
         <template v-slot:title>
             Add Task
@@ -14,7 +15,7 @@
                 class="custom-control"
                 v-model="name"
                 type="text"
-                @keyup.enter="submitted"
+                placeholder="Name"
             />
             <select v-model="project" class="custom-select">
                 <option selected>Select Project of Task</option>
@@ -34,6 +35,40 @@
                     >{{ board.title }}</option
                 >
             </select>
+            <input
+                class="custom-control"
+                v-model="location"
+                type="text"
+                placeholder="Location"
+            />
+            <div class="form-row mx-0">
+                <input
+                    class="custom-control"
+                    v-model="startDate"
+                    type="date"
+                /><input
+                    class="custom-control"
+                    v-model="startTime"
+                    type="time"
+                />
+            </div>
+            <div class="form-row mx-0 my-2">
+                <input
+                    class="custom-control"
+                    v-model="dueDate"
+                    type="date"
+                /><input
+                    class="custom-control"
+                    v-model="dueTime"
+                    type="time"
+                />
+            </div>
+            <textarea
+                v-model="description"
+                class="custom-control"
+                placeholder="Description"
+                rows="5"
+            />
         </template>
     </modal>
 </template>
@@ -59,7 +94,14 @@ export default defineComponent({
         return {
             name: "",
             project: project?.id || (null as null | number),
-            board: board?.id || (null as null | number)
+            board: board?.id || (null as null | number),
+            description: "",
+            startDate: null as null | any,
+            startTime: null as null | any,
+            dueDate: null as null | any,
+            dueTime: null as null | any,
+            location: "",
+            submitting: false,
         };
     },
     computed: {
@@ -72,19 +114,56 @@ export default defineComponent({
             $("#task-name").trigger("focus")
         );
     },
+    watch: {
+        startDate() {
+            // automatically set time to 0:00 if not set yet
+            if (this.startDate && !this.startTime) {
+                this.startTime = "0:00";
+            }
+        },
+        dueDate() {
+            // automatically set time to 0:00 if not set yet
+            if (this.dueDate && !this.dueTime) {
+                this.dueTime = "0:00";
+            }
+        },
+    },
     methods: {
+        getDate(dateString: string, timeString: string): Date | undefined {
+            let date;
+            try {
+                date = new Date(dateString + "T" + timeString);
+            } catch {
+                // invalid string are not reported to user
+                console.log(`Invalid Date or Timestring: '${dateString}','${timeString}'`);
+            }
+            return date;
+        },
         async submitted() {
-            // TODO: handle error
-            await this.$store.dispatch("addTask", {
-                title: this.name,
-                project: this.project,
-                board: this.board
-            } as Create<Task>);
+            if (this.submitting) {
+                return;
+            }
+            this.submitting = true;
 
-            this.name = "";
+            try {
+                // TODO: handle error
+                await this.$store.dispatch("addTask", {
+                    title: this.name,
+                    project: this.project,
+                    board: this.board,
+                    description: this.description,
+                    start: this.getDate(this.startDate, this.startTime),
+                    due: this.getDate(this.dueDate, this.dueTime),
+                    location: this.location
+                } as Create<Task>);
 
-            this.$emit("finish");
-            this.$emit("close");
+                this.name = "";
+
+                this.$emit("finish");
+                this.$emit("close");
+            } finally {
+                this.submitting = false;
+            }
         }
     }
 });

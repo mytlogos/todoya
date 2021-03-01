@@ -107,7 +107,8 @@ const api = {
     },
 };
 
-export type Create<T> = Exclude<T, keyof Entity>;
+export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
+export type Create<T extends Entity> = PartialBy<T, keyof Entity>;
 
 export interface Entity {
     id: number;
@@ -125,12 +126,12 @@ export interface Board extends Entity {
 
 export interface Task extends Entity {
     title: string;
-    start: Date | string;
-    due: Date | string;
-    completion_date: Date | string;
-    location: string;
+    start?: Date | string;
+    due?: Date | string;
+    completion_date?: Date | string;
+    location?: string;
     description: string;
-    board: number;
+    board?: number;
     project: number;
 }
 
