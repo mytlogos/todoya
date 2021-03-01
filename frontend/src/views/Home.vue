@@ -90,5 +90,6 @@ export default defineComponent({
     border-right: 1px solid rgba(0, 0, 0, 0.1);
     width: 10vw;
     overflow-y: auto;
+    min-width: 10em;
 }
 </style>
