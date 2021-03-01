@@ -57,5 +57,6 @@ export default defineComponent({
 }
 .task-lane > .card-body > div {
     min-height: 50px;
+    height: 100%;
 }
 </style>
