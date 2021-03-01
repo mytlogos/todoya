@@ -49,7 +49,7 @@
                     :aria-current="
                         selectedProjects.includes(project.id) ? 'true' : 'false'
                     "
-                    @click.left="toggle(project)"
+                    @click.left.prevent="toggle(project, $event)"
                     href="#"
                     class="list-group-item list-group-item-action"
                 >
@@ -79,8 +79,8 @@ export default defineComponent({
         ...mapState(["projects", "selectedProjects"])
     },
     methods: {
-        toggle(project: Project) {
-            this.$store.commit("toggleProjectSelect", project);
+        toggle(project: Project, event: MouseEvent) {
+            this.$store.commit("toggleProjectSelect", {project, multi: event.ctrlKey});
         }
     }
 });

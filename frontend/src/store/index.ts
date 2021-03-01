@@ -55,13 +55,17 @@ export default createStore({
     removeProject(state, project: Project) {
       remove(state.boards, project);
     },
-    toggleProjectSelect(state, project: Project) {
+    toggleProjectSelect(state, { project, multi }: { project: Project, multi: boolean }) {
       const index = state.selectedProjects.indexOf(project.id);
 
-      if (index < 0) {
-        state.selectedProjects.push(project.id);
+      if (multi) {
+        if (index < 0) {
+          state.selectedProjects.push(project.id);
+        } else {
+          state.selectedProjects.splice(index, 1);
+        }
       } else {
-        state.selectedProjects.splice(index, 1);
+        state.selectedProjects = index < 0 ? [project.id] : [];
       }
     },
     setTasks(state, tasks: Task[]) {
