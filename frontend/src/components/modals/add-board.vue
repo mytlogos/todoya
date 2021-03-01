@@ -1,10 +1,10 @@
 <template>
-    <modal :show="show" @submit="submitted" @close="$emit('close')">
+    <modal id="add-board-modal" :show="show" @submit="submitted" @close="$emit('close')">
         <template v-slot:title>
             Add Board
         </template>
         <template v-slot:body>
-            <input class="custom-control" v-model="name" type="text" @keyup.enter="submitted" />
+            <input id="board-name" class="custom-control" v-model="name" type="text" @keyup.enter="submitted" />
             <select v-model="project" class="custom-select">
                 <option selected>Select Project of Board</option>
                 <option
@@ -22,6 +22,7 @@
 import { Create, Board } from "@/client";
 import { defineComponent } from "vue";
 import modal from "./modal.vue";
+import $ from "jquery";
 
 export default defineComponent({
     name: "AddBoardModal",
@@ -37,20 +38,10 @@ export default defineComponent({
             project: project?.id || null as null | number
         };
     },
-    watch: {
-        show() {
-            const root = this.$el as HTMLElement;
-            console.log("should focus", root, this.show);
-
-            if (!root) {
-                return;
-            }
-            if (this.show) {
-                const input = root.querySelector("input");
-                input?.focus();
-                console.log("should focus", input);
-            }
-        }
+    mounted() {
+        $("#add-board-modal").on("shown.bs.modal", () =>
+            $("#board-name").trigger("focus")
+        );
     },
     methods: {
         async submitted() {

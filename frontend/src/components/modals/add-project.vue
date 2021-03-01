@@ -1,10 +1,10 @@
 <template>
-    <modal :show="show" @submit="submitted" @close="$emit('close')">
+    <modal id="add-project-modal" :show="show" @submit="submitted" @close="$emit('close')">
         <template v-slot:title>
             Add Project
         </template>
         <template v-slot:body>
-            <input class="custom-control" v-model="name" type="text">
+            <input id="project-name" class="custom-control" v-model="name" type="text">
         </template>
     </modal>
 </template>
@@ -13,6 +13,7 @@
 import { Create, Project } from "@/client";
 import { defineComponent } from "vue";
 import modal from "./modal.vue";
+import $ from "jquery";
 
 export default defineComponent({
     name: "AddProjectModal",
@@ -26,17 +27,10 @@ export default defineComponent({
             name: "",
         };
     },
-    watch: {
-        show() {
-            const root = this.$el as HTMLElement;
-            console.log("should focus", root, this.show);
-            if (!root) {
-                return;
-            }
-            if (this.show) {
-                root.querySelector("input")?.focus();
-            }
-        }
+    mounted() {
+        $("#add-project-modal").on("shown.bs.modal", () =>
+            $("#project-name").trigger("focus")
+        );
     },
     methods: {
         async submitted() {
