@@ -85,7 +85,7 @@ export default defineComponent({
     }
 });
 </script>
-<style scoped>
+<style>
 .left-sidebar {
     border-right: 1px solid rgba(0, 0, 0, 0.1);
     width: 10vw;
