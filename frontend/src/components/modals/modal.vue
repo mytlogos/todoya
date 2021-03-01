@@ -55,9 +55,11 @@ export default defineComponent({
         show: Boolean
     },
     emits: ["close", "submit"],
+    mounted() {
+        $(this.$refs.modal as HTMLElement).on("hidden.bs.modal", () => this.$emit("close"));
+    },
     watch: {
         show() {
-            console.log("should show");
             if (this.show) {
                 $(this.$refs.modal as HTMLElement).modal("show");
             } else {
