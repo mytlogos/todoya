@@ -27,6 +27,21 @@ export default createStore({
     tasks: [],
     selectedProjects: []
   }),
+  getters: {
+    getBoards: (state) => (id: number): Board[] => {
+      return state.boards.filter(value => value.project === id);
+    },
+    getBoardTasks: (state) => (id: number): Board[] => {
+      return state.tasks.filter(value => value.board === id);
+    },
+    getFirstProject(state): null | Project {
+      const firstSelected = state.selectedProjects[0];
+      return firstSelected ? state.projects.find(value => firstSelected === value.id) || null : null;
+    },
+    getProject: (state) => (id: number): undefined | Project => {
+      return state.projects.find(value => id === value.id);
+    },
+  },
   mutations: {
     setProject(state, projects: Project[]) {
       state.projects = projects;
@@ -41,19 +56,22 @@ export default createStore({
       const index = state.selectedProjects.indexOf(project.id);
 
       if (index < 0) {
-          state.selectedProjects.push(project.id);
+        state.selectedProjects.push(project.id);
       } else {
-          state.selectedProjects.splice(index, 1);
+        state.selectedProjects.splice(index, 1);
       }
     },
     setTasks(state, tasks: Task[]) {
       state.tasks = tasks;
     },
-    addTasks(state, task: Task) {
+    addTask(state, task: Task) {
       state.tasks.push(task);
     },
-    removeTasks(state, board: Board) {
+    removeTask(state, board: Board) {
       remove(state.boards, board);
+    },
+    updateBoardTasks(state, { items, boardId }) {
+      items.forEach((value: Task) => value.board = boardId);
     },
     setBoards(state, boards: Board[]) {
       state.boards = boards;
