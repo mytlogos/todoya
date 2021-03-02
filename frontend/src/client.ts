@@ -12,97 +12,97 @@ const api = {
     "api_projects_": {
         get: {
             method: Methods.get,
-            path: "api/api/projects/"
+            path: "api/projects/"
         },
         post: {
             method: Methods.post,
-            path: "api/api/projects/"
+            path: "api/projects/"
         },
     },
     "api_projects_{id}_": {
         delete: {
             method: Methods.delete,
-            path: "api/api/projects/{id}/"
+            path: "api/projects/{id}/"
         },
         get: {
             method: Methods.get,
-            path: "api/api/projects/{id}/"
+            path: "api/projects/{id}/"
         },
         put: {
             method: Methods.put,
-            path: "api/api/projects/{id}/"
+            path: "api/projects/{id}/"
         },
     },
     "api_boards_": {
         get: {
             method: Methods.get,
-            path: "api/api/boards/"
+            path: "api/boards/"
         },
         post: {
             method: Methods.post,
-            path: "api/api/boards/"
+            path: "api/boards/"
         },
     },
     "api_boards_{id}_": {
         delete: {
             method: Methods.delete,
-            path: "api/api/boards/{id}/"
+            path: "api/boards/{id}/"
         },
         get: {
             method: Methods.get,
-            path: "api/api/boards/{id}/"
+            path: "api/boards/{id}/"
         },
         put: {
             method: Methods.put,
-            path: "api/api/boards/{id}/"
+            path: "api/boards/{id}/"
         },
     },
     "api_tasks_": {
         get: {
             method: Methods.get,
-            path: "api/api/tasks/"
+            path: "api/tasks/"
         },
         post: {
             method: Methods.post,
-            path: "api/api/tasks/"
+            path: "api/tasks/"
         },
     },
     "api_tasks_{id}_": {
         delete: {
             method: Methods.delete,
-            path: "api/api/tasks/{id}/"
+            path: "api/tasks/{id}/"
         },
         get: {
             method: Methods.get,
-            path: "api/api/tasks/{id}/"
+            path: "api/tasks/{id}/"
         },
         put: {
             method: Methods.put,
-            path: "api/api/tasks/{id}/"
+            path: "api/tasks/{id}/"
         },
     },
     "api_categories_": {
         get: {
             method: Methods.get,
-            path: "api/api/categories/"
+            path: "api/categories/"
         },
         post: {
             method: Methods.post,
-            path: "api/api/categories/"
+            path: "api/categories/"
         },
     },
     "api_categories_{id}_": {
         delete: {
             method: Methods.delete,
-            path: "api/api/categories/{id}/"
+            path: "api/categories/{id}/"
         },
         get: {
             method: Methods.get,
-            path: "api/api/categories/{id}/"
+            path: "api/categories/{id}/"
         },
         put: {
             method: Methods.put,
-            path: "api/api/categories/{id}/"
+            path: "api/categories/{id}/"
         },
     },
 };
@@ -236,7 +236,7 @@ export const HttpClient = {
                     url.searchParams.append(key, query[key]),
                 );
             } else {
-                // @ts-ignore
+                // @ts-expect-error
                 init.body = JSON.stringify(query);
             }
         }

@@ -35,7 +35,7 @@ export default defineComponent({
         const project = this.$store.getters.getFirstProject;
         return {
             name: "",
-            project: project?.id || null as null | number
+            project: (project?.id || null) as null | number
         };
     },
     mounted() {
