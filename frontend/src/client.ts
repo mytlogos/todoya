@@ -145,7 +145,7 @@ export const HttpClient = {
         return this.queryServer(api.api_projects_.get);
     },
 
-    postApiProjects(value: Project): Promise<unknown> {
+    postApiProjects(value: Create<Project>): Promise<Project> {
         return this.queryServer(api.api_projects_.post, value);
     },
 
@@ -165,7 +165,7 @@ export const HttpClient = {
         return this.queryServer(api.api_boards_.get);
     },
 
-    postApiBoards(value: Board): Promise<unknown> {
+    postApiBoards(value: Create<Board>): Promise<Board> {
         return this.queryServer(api.api_boards_.post, value);
     },
 
@@ -185,7 +185,7 @@ export const HttpClient = {
         return this.queryServer(api.api_tasks_.get);
     },
 
-    postApiTasks(value: Task): Promise<unknown> {
+    postApiTasks(value: Create<Task>): Promise<Task> {
         return this.queryServer(api.api_tasks_.post, value);
     },
 
@@ -205,7 +205,7 @@ export const HttpClient = {
         return this.queryServer(api.api_categories_.get);
     },
 
-    postApiCategories(value: Category): Promise<unknown> {
+    postApiCategories(value: Create<Category>): Promise<Category> {
         return this.queryServer(api.api_categories_.post, value);
     },
 
