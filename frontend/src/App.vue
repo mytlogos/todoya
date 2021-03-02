@@ -13,6 +13,9 @@ export default defineComponent({
     name: "Home",
     components: {
         AppHeader
+    },
+    async created() {
+        await this.$store.dispatch("sync");
     }
 });
 </script>

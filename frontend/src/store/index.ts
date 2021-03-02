@@ -1,4 +1,4 @@
-import { Board, Create, Entity, Project, Task } from "@/client";
+import { Board, Create, Entity, HttpClient, Project, Task } from "@/client";
 import { VuexStore } from "@/siteTypes";
 import { createLogger, createStore } from "vuex";
 import persistedState from "vuex-persistedstate";
@@ -14,6 +14,20 @@ function nextId<T extends Entity>(entities: T[]): number {
   let maxId = 0;
   entities.forEach(value => value.id > maxId ? maxId = value.id : undefined);
   return maxId + 1;
+}
+
+async function sync<T extends Entity>(online: Promise<Array<T>>, current: T[], create: (value : T) => Promise<any>): Promise<T[]> {
+  const onlineValues = await online;
+  const ids = new Set(onlineValues.map(value => value.id));
+
+  // add all new values separately
+  await Promise.all(
+    current
+      .filter(value => !ids.has(value.id))
+      .map(value => create(value).then(created => onlineValues.push(created)))
+  );
+
+  return onlineValues;
 }
 
 export default createStore({
@@ -91,18 +105,49 @@ export default createStore({
     }
   },
   actions: {
-    async addTask({ commit, state }, task: Create<Task>) {
-      task.id = nextId(state.tasks);
+    async addTask({ commit, state }, task: Create<Task>): Promise<Task> {
+      try {
+        task = await HttpClient.postApiTasks(task);
+      } catch (error) {
+        console.error(error);
+        // generate temporary id when it fails
+        task.id = nextId(state.tasks);
+      }
       commit("addTask", task);
+      return task as Task;
     },
-    async addProject({ commit, state }, project: Create<Project>) {
-      project.id = nextId(state.projects);
+    async addProject({ commit, state }, project: Create<Project>): Promise<Project> {
+      try {
+        project = await HttpClient.postApiProjects(project);
+      } catch (error) {
+        console.error(error);
+        // generate temporary id when it fails
+        project.id = nextId(state.projects);
+      }
       commit("addProject", project);
+      return project as Project;
     },
-    async addBoard({ commit, state }, board: Create<Board>) {
-      board.id = nextId(state.boards);
+    async addBoard({ commit, state }, board: Create<Board>): Promise<Board> {
+      try {
+        board = await HttpClient.postApiBoards(board);
+      } catch (error) {
+        console.error(error);
+        // generate temporary id when it fails
+        board.id = nextId(state.boards);
+      }
       commit("addBoard", board);
+      return board as Board;
     },
+    async sync({ commit, state }) {
+      const projects = await sync(HttpClient.getApiProjects(), state.projects, value => HttpClient.postApiProjects(value));
+      commit("setProjects", projects);
+
+      const boards = await sync(HttpClient.getApiBoards(), state.boards, value => HttpClient.postApiBoards(value));
+      commit("setBoards", boards);
+
+      const tasks = await sync(HttpClient.getApiTasks(), state.tasks, value => HttpClient.postApiTasks(value));
+      commit("setTasks", tasks);
+    }
   },
   modules: {}
 });
