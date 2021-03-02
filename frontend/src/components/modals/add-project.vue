@@ -17,15 +17,34 @@
                 type="text"
                 @keyup.enter="submitted"
             />
+            <div
+                class="custom-control custom-checkbox"
+                data-toggle="tooltip"
+                title="The default Boards are: \nBacklog, Todo, In Progress, Waiting, Done"
+            >
+                <input
+                    v-model="createDefaultBoards"
+                    class="custom-control-input"
+                    type="checkbox"
+                    id="defaultBoardsCheck"
+                />
+                <label class="custom-control-label" for="defaultBoardsCheck">
+                    Create Default Boards
+                </label>
+            </div>
         </template>
     </modal>
 </template>
 
 <script lang="ts">
-import { Create, Project } from "@/client";
+import { Board, Create, Project } from "@/client";
 import { defineComponent } from "vue";
 import modal from "./modal.vue";
 import $ from "jquery";
+
+$(function() {
+    $('[data-toggle="tooltip"]').tooltip();
+});
 
 export default defineComponent({
     name: "AddProjectModal",
@@ -37,6 +56,7 @@ export default defineComponent({
     data() {
         return {
             name: "",
+            createDefaultBoards: true
         };
     },
     mounted() {
@@ -47,9 +67,21 @@ export default defineComponent({
     methods: {
         async submitted() {
             // TODO: handle error
-            await this.$store.dispatch("addProject", {
-                title: this.name,
-            } as Create<Project>);
+            const project = await this.$store.dispatch("addProject", {
+                title: this.name
+            } as Create<Project>) as Project;
+
+            if (this.createDefaultBoards) {
+                await Promise.all(
+                    ["Backlog", "Todo", "In Progress", "Waiting", "Done"].map(
+                        value =>
+                            this.$store.dispatch("addBoard", {
+                                title: value,
+                                project: project.id,
+                            } as Create<Board>)
+                    )
+                );
+            }
 
             this.name = "";
             this.$emit("finish");
