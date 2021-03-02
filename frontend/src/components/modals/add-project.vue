@@ -1,10 +1,22 @@
 <template>
-    <modal id="add-project-modal" :show="show" @submit="submitted" @close="$emit('close')">
+    <modal
+        id="add-project-modal"
+        :show="show"
+        @submit="submitted"
+        @close="$emit('close')"
+        @keyup.enter.ctrl="submitted"
+    >
         <template v-slot:title>
             Add Project
         </template>
         <template v-slot:body>
-            <input id="project-name" class="custom-control" v-model="name" type="text">
+            <input
+                id="project-name"
+                class="custom-control"
+                v-model="name"
+                type="text"
+                @keyup.enter="submitted"
+            />
         </template>
     </modal>
 </template>

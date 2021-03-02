@@ -1,10 +1,22 @@
 <template>
-    <modal id="add-board-modal" :show="show" @submit="submitted" @close="$emit('close')">
+    <modal
+        id="add-board-modal"
+        :show="show"
+        @submit="submitted"
+        @close="$emit('close')"
+        @keyup.enter.ctrl="submitted"
+    >
         <template v-slot:title>
             Add Board
         </template>
         <template v-slot:body>
-            <input id="board-name" class="custom-control" v-model="name" type="text" @keyup.enter="submitted" />
+            <input
+                id="board-name"
+                class="custom-control"
+                v-model="name"
+                type="text"
+                @keyup.enter="submitted"
+            />
             <select v-model="project" class="custom-select">
                 <option selected>Select Project of Board</option>
                 <option
