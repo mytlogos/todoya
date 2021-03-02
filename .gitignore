@@ -165,6 +165,9 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+# Django specific things
+migrations/
+
 ## Nodejs Template
  Logs
 logs
