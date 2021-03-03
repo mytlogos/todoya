@@ -12,7 +12,7 @@
                 <span>Start Time:</span> {{ task.start?.toLocaleString() || "None" }}
             </div>
             <div>
-                <span>Due Time:</span> {{ task.start?.toLocaleString() || "None" }}
+                <span>Due Time:</span> {{ task.due?.toLocaleString() || "None" }}
             </div>
             <div>
                 <span>Location:</span> {{ task.location || "None" }}
@@ -28,7 +28,7 @@
 
 <script lang="ts">
 import { Task } from "@/client";
-import { defineComponent, PropType } from "vue";
+import { defineComponent } from "vue";
 export default defineComponent({
     name: "TaskItem",
     props: {
