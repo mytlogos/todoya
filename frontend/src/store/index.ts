@@ -33,7 +33,15 @@ async function sync<T extends Entity>(online: Promise<Array<T>>, current: T[], c
 export default createStore({
   plugins: [
     createLogger(),
-    persistedState(),
+    persistedState({
+      rehydrated: store => {
+        // rehydrate dates
+        store.state.tasks.forEach(task => {
+          task.start = task.start && new Date(task.start);
+          task.due = task.due && new Date(task.due);
+        })
+      }
+    }),
   ],
   state: (): VuexStore => ({
     projects: [],

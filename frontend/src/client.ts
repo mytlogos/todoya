@@ -182,7 +182,14 @@ export const HttpClient = {
     },
 
     getApiTasks(): Promise<Task[]> {
-        return this.queryServer(api.api_tasks_.get);
+        return this.queryServer(api.api_tasks_.get).then(tasks => {
+            // Force string Dates in task to Date object
+            tasks.forEach((task: Task) => {
+                task.start = task.start && new Date(task.start);
+                task.due = task.due && new Date(task.due);
+            });
+            return tasks;
+        });
     },
 
     postApiTasks(value: Create<Task>): Promise<Task> {
