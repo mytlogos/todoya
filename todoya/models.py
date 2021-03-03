@@ -21,6 +21,7 @@ class Task(models.Model):
     description = models.TextField(blank=True)
     board = models.ForeignKey(Board, null=True, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    parent_task = models.ForeignKey("Task", null=True, on_delete=models.CASCADE)
 
 
 class Category(models.Model):

@@ -9,13 +9,26 @@
                 <span>Board:</span> {{ $store.getters.getBoard(task.board)?.title || "None" }}
             </div>
             <div>
+                <span>Parent Task:</span> {{ parentTask?.title || "None" }}
+            </div>
+            <div>
                 <span>Start Time:</span> {{ task.start?.toLocaleString() || "None" }}
             </div>
             <div>
                 <span>Due Time:</span> {{ task.due?.toLocaleString() || "None" }}
             </div>
-            <div>
-                <span>Location:</span> {{ task.location || "None" }}
+            <div v-if="taskChildren.length">
+                <div>Subtasks:</div>
+                <ul class="list-group list-group-flush">
+                <a
+                    v-for="child in taskChildren"
+                    :key="child.id"
+                    href="#"
+                    class="list-group-item list-group-item-action"
+                >
+                    {{ child.title }}
+                </a>
+            </ul>
             </div>
             <h3>Description</h3>
             <p>{{ task.description || "No Description available" }}</p>
@@ -39,10 +52,14 @@ export default defineComponent({
     },
     computed: {
         task(): Task | undefined {
-            return this.$store.state.tasks.find(
-                task => this.taskId === task.id
-            );
-        }
+            return this.$store.getters.getTask(this.taskId);
+        },
+        parentTask(): Task | undefined {
+            return this.task && this.$store.getters.getTask(this.task.parent_task);
+        },
+        taskChildren(): Task[] {
+            return this.$store.state.tasks.filter(value => value.parent_task === this.taskId);
+        },
     }
 });
 </script>

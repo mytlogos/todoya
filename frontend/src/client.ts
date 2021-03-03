@@ -133,6 +133,7 @@ export interface Task extends Entity {
     description: string;
     board?: number;
     project: number;
+    parent_task?: Task | null;
 }
 
 export interface Category extends Entity {

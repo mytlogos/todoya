@@ -53,8 +53,14 @@ export default createStore({
     getBoards: (state) => (projectId: number): Board[] => {
       return state.boards.filter(value => value.project === projectId);
     },
-    getBoardTasks: (state) => (id: number): Board[] => {
+    getBoardTasks: (state) => (id: number): Task[] => {
       return state.tasks.filter(value => value.board === id);
+    },
+    getProjectTasks: (state) => (id: number): Task[] => {
+      return state.tasks.filter(value => value.project === id);
+    },
+    getTask: (state) => (id: number): Task | undefined => {
+      return state.tasks.find(value => value.id === id);
     },
     getFirstProject(state): null | Project {
       const firstSelected = state.selectedProjects[0];

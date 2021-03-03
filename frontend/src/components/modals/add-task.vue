@@ -41,6 +41,15 @@
                 type="text"
                 placeholder="Location"
             />
+            <select v-model="parentTask" class="custom-select">
+                <option selected>Select optional Parent Task</option>
+                <option
+                    v-for="task in possibleTaskParents"
+                    :key="task.id"
+                    :value="task.id"
+                    >{{ task.title }}</option
+                >
+            </select>
             <div class="form-row mx-0">
                 <input
                     class="custom-control"
@@ -102,11 +111,15 @@ export default defineComponent({
             dueTime: null as null | any,
             location: "",
             submitting: false,
+            parentTask: null as null | Task,
         };
     },
     computed: {
         boards(): Board[] {
             return this.$store.getters.getBoards(this.project);
+        },
+        possibleTaskParents(): Task[] {
+            return this.$store.getters.getProjectTasks(this.project);
         }
     },
     mounted() {
@@ -154,7 +167,8 @@ export default defineComponent({
                     description: this.description,
                     start: this.getDate(this.startDate, this.startTime),
                     due: this.getDate(this.dueDate, this.dueTime),
-                    location: this.location
+                    location: this.location,
+                    parent_task: this.parentTask?.id,
                 } as Create<Task>);
 
                 this.name = "";
