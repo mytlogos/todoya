@@ -44,7 +44,7 @@
                 <div
                     v-for="weekDay of weekDays"
                     :key="weekDay.index"
-                    :class="{ 'text-danger': weekDay.weekEnd, past: isPast(weekDay.index, week) }"
+                    :class="{ 'text-danger': weekDay.weekEnd, past: isPast(weekDay.index, week), today: isToday(weekDay.index, week) }"
                     class="col day-cell bg-white"
                 >
                     <span class="font-weight-bold">{{
@@ -167,6 +167,11 @@ export default defineComponent({
             // check if earlier day
             return !value || value.toISOString().substring(0, 10) < this.today.toISOString().substring(0, 10);
         },
+        isToday(weekDayIndex: number, weekIndex: number): boolean {
+            const value = this.calendar[weekIndex][weekDayIndex];
+            // check if earlier day
+            return !!value && value.toDateString() === this.today.toDateString();
+        },
         currentDisplayed() {
             const locale = navigator.languages
                 ? navigator.languages[0]
@@ -203,6 +208,9 @@ export default defineComponent({
 }
 .day-cell.past {
     background-color: #e8e8e8 !important;
+}
+.day-cell.today {
+    background-color: cornsilk !important;
 }
 .week-cell {
     height: 10em;
