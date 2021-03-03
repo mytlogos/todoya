@@ -236,6 +236,15 @@ export const HttpClient = {
                 "Content-Type": "application/json; charset=utf-8",
             },
         };
+        // template entity id if available
+        const idIndex = path.indexOf("/{id}/");
+
+        if (idIndex >= 0) {
+            if (!query || !Number.isInteger(query.id)) {
+                throw Error(`No Entity Id available in Query: '${query}'`)
+            }
+            path = path.replace("/{id}/", `/${query.id}/`);
+        }
         const url = new URL(`${window.location.origin}/${path}`);
         if (query) {
             if (method === Methods.get) {
