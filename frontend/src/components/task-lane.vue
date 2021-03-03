@@ -35,7 +35,7 @@ export default defineComponent({
                 return this.$store.getters.getBoardTasks(this.board.id);
             },
             set(items: Task[]) {
-                this.$store.commit("updateBoardTasks", {
+                this.$store.dispatch("updateBoardTasks", {
                     items,
                     boardId: this.board.id
                 });

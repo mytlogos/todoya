@@ -16,7 +16,7 @@ function nextId<T extends Entity>(entities: T[]): number {
   return maxId + 1;
 }
 
-async function sync<T extends Entity>(online: Promise<Array<T>>, current: T[], create: (value : T) => Promise<any>): Promise<T[]> {
+async function sync<T extends Entity>(online: Promise<Array<T>>, current: T[], create: (value: T) => Promise<any>): Promise<T[]> {
   const onlineValues = await online;
   const ids = new Set(onlineValues.map(value => value.id));
 
@@ -99,8 +99,12 @@ export default createStore({
     removeTask(state, board: Board) {
       remove(state.boards, board);
     },
-    updateBoardTasks(state, { items, boardId }) {
-      items.forEach((value: Task) => value.board = boardId);
+    updateTask(state, task: Task) {
+      const found = state.tasks.find(value => task.id === value.id);
+
+      if (found) {
+        Object.assign(found, task);
+      }
     },
     setBoards(state, boards: Board[]) {
       state.boards = boards;
@@ -123,6 +127,13 @@ export default createStore({
       }
       commit("addTask", task);
       return task as Task;
+    },
+    async updateBoardTasks({ commit }, payload: { items: Task[], boardId: number }) {
+      const toChangeItems = await Promise.all(payload.items.filter(value => value.board !== payload.boardId).map(task => {
+        return HttpClient.putApiTasksbyId({...task, board: payload.boardId}).catch(error => console.error(task, error))
+      }));
+      // as some update may have failed, filter them out and update the rest, we printed the error on the console
+      toChangeItems.filter(value => value).forEach(value => commit("updateTask", value));
     },
     async addProject({ commit, state }, project: Create<Project>): Promise<Project> {
       try {
