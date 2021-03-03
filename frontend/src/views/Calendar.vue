@@ -47,7 +47,17 @@
                     :class="{ 'text-danger': weekDay.weekEnd }"
                     class="col day-cell bg-white"
                 >
-                    <span class="font-weight-bold">{{ dayOfMonth(weekDay.index, week) }}</span>
+                    <span class="font-weight-bold">{{
+                        dayOfMonth(weekDay.index, week)
+                    }}</span>
+
+                    <div
+                        v-for="task of tasksOfDay(weekDay.index, week)"
+                        :key="task.id"
+                        class="task text-truncate"
+                    >
+                        {{ task.title }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -55,6 +65,7 @@
 </template>
 
 <script lang="ts">
+import { Task } from "@/client";
 import { defineComponent } from "vue";
 
 enum Navigation {
@@ -158,6 +169,21 @@ export default defineComponent({
                 month: "long",
                 year: "numeric"
             });
+        },
+        tasksOfDay(weekDayIndex: number, weekIndex: number): Task[] {
+            const value = this.calendar[weekIndex][weekDayIndex];
+            if (!value) {
+                return [];
+            }
+            const date = value.toDateString();
+            return this.$store.state.tasks.filter(task => {
+                return (
+                    (task.start instanceof Date &&
+                        task.start.toDateString() === date) ||
+                    (task.due instanceof Date &&
+                        task.due.toDateString() === date)
+                );
+            });
         }
     }
 });
@@ -172,4 +198,21 @@ export default defineComponent({
 .week-cell {
     height: 10em;
 }
+.task {
+    display: block;
+    color: white;
+    background-color: #dc3545;
+    padding-right: 0.6em;
+    padding-left: 0.6em;
+    border-radius: 10rem;
+}
+.task ~ .task {
+    margin-top: 2px;
+}
+/* For a single Task over its current and parent-sibling days */
+/* element {
+	width: 230px;
+	position: absolute;
+	z-index: 1;
+} */
 </style>
