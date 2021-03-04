@@ -34,8 +34,12 @@ const routes: Array<RouteRecordRaw> = [
   },
 ];
 
+function routerBase(): string {
+  const base = process.env.BASE_URL as string || "/"
+  return base.endsWith("static/") ? base.substring(0, base.length - 7) : base;
+}
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHistory(routerBase()),
   routes
 });
 
