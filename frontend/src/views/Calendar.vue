@@ -41,31 +41,20 @@
                 :key="week"
                 class="row week-cell"
             >
-                <div
+                <calendar-day
                     v-for="weekDay of weekDays"
                     :key="weekDay.index"
-                    :class="{ 'text-danger': weekDay.weekEnd, past: isPast(weekDay.index, week), today: isToday(weekDay.index, week) }"
-                    class="col day-cell bg-white"
-                >
-                    <span class="font-weight-bold">{{
-                        dayOfMonth(weekDay.index, week)
-                    }}</span>
-
-                    <div
-                        v-for="task of tasksOfDay(weekDay.index, week)"
-                        :key="task.id"
-                        class="task text-truncate"
-                    >
-                        {{ task.title }}
-                    </div>
-                </div>
+                    :day="calendar[week][weekDay.index]"
+                    :weekEnd="weekDay.weekEnd"
+                    :today="today"
+                />
             </div>
         </div>
     </div>
 </template>
 
 <script lang="ts">
-import { Task } from "@/client";
+import calendarDay from "@/components/calendar-day.vue";
 import { defineComponent } from "vue";
 
 enum Navigation {
@@ -75,6 +64,7 @@ enum Navigation {
 }
 
 export default defineComponent({
+    components: { calendarDay },
     name: "Calendar",
     data() {
         return {
@@ -155,23 +145,6 @@ export default defineComponent({
             this.current.setMonth(current + direction);
             this.current = new Date(this.current);
         },
-        dayOfMonth(weekDayIndex: number, weekIndex: number): null | number {
-            const value = this.calendar[weekIndex][weekDayIndex];
-            if (!value) {
-                return null;
-            }
-            return value.getDate();
-        },
-        isPast(weekDayIndex: number, weekIndex: number): boolean {
-            const value = this.calendar[weekIndex][weekDayIndex];
-            // check if earlier day
-            return !value || value.toISOString().substring(0, 10) < this.today.toISOString().substring(0, 10);
-        },
-        isToday(weekDayIndex: number, weekIndex: number): boolean {
-            const value = this.calendar[weekIndex][weekDayIndex];
-            // check if earlier day
-            return !!value && value.toDateString() === this.today.toDateString();
-        },
         currentDisplayed() {
             const locale = navigator.languages
                 ? navigator.languages[0]
@@ -180,27 +153,15 @@ export default defineComponent({
                 month: "long",
                 year: "numeric"
             });
-        },
-        tasksOfDay(weekDayIndex: number, weekIndex: number): Task[] {
-            const value = this.calendar[weekIndex][weekDayIndex];
-            if (!value) {
-                return [];
-            }
-            const date = value.toDateString();
-            return this.$store.state.tasks.filter(task => {
-                return (
-                    (task.start instanceof Date &&
-                        task.start.toDateString() === date) ||
-                    (task.due instanceof Date &&
-                        task.due.toDateString() === date)
-                );
-            });
         }
     }
 });
 </script>
 
-<style scoped>
+<style>
+.week-cell {
+    height: 10em;
+}
 .day-cell {
     width: 10em;
     border-right: 1px solid lightgrey;
@@ -211,9 +172,6 @@ export default defineComponent({
 }
 .day-cell.today {
     background-color: cornsilk !important;
-}
-.week-cell {
-    height: 10em;
 }
 .task {
     display: block;
