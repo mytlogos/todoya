@@ -11,6 +11,14 @@ class Board(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
 
+class Category(models.Model):
+    title = models.TextField()
+
+
+class Label(models.Model):
+    title = models.TextField()
+
+
 class Task(models.Model):
     title = models.TextField()
     start = models.DateTimeField(null=True)
@@ -22,8 +30,10 @@ class Task(models.Model):
     board = models.ForeignKey(Board, null=True, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     parent_task = models.ForeignKey("Task", null=True, on_delete=models.CASCADE)
+    categories = models.ManyToManyField(Category, blank=True)
+    labels = models.ManyToManyField(Label, blank=True)
 
 
-class Category(models.Model):
-    title = models.TextField()
-    tasks = models.ManyToManyField(Task)
+class Reminder(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    when = models.DateTimeField()

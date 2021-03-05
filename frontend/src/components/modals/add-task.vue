@@ -66,11 +66,24 @@
                     class="custom-control"
                     v-model="dueDate"
                     type="date"
-                /><input
+                /><input class="custom-control" v-model="dueTime" type="time" />
+            </div>
+            <div class="form-row form-inline mx-0 my-2">
+                <label style="margin-right: 0.5em;">Remind me:</label>
+                <input
                     class="custom-control"
-                    v-model="dueTime"
-                    type="time"
+                    style="width: 5em;"
+                    v-model.number="reminderValue"
+                    type="number"
                 />
+                <select v-model="reminderUnit" class="custom-select">
+                    <option
+                        v-for="reminder in possibleReminder"
+                        :key="reminder.value"
+                        :value="reminder.value"
+                        >{{ reminder.name }}</option
+                    >
+                </select>
             </div>
             <textarea
                 v-model="description"
@@ -83,10 +96,20 @@
 </template>
 
 <script lang="ts">
-import { Board, Create, Task } from "@/client";
+import { Board, Create, Reminder, Task } from "@/client";
 import { defineComponent } from "vue";
 import modal from "./modal.vue";
 import $ from "jquery";
+
+enum TimeUnit {
+    SECOND = 1,
+    MINUTE = SECOND * 60,
+    HOUR = MINUTE * 60,
+    DAY = HOUR * 24,
+    WEEK = 7 * 24,
+    MONTH = DAY * 30,
+    YEAR = DAY * 365
+}
 
 export default defineComponent({
     name: "AddTaskModal",
@@ -112,6 +135,26 @@ export default defineComponent({
             location: "",
             submitting: false,
             parentTask: null as null | Task,
+            reminderValue: null as null | number,
+            reminderUnit: TimeUnit.DAY,
+            possibleReminder: [
+                {
+                    name: "Week before",
+                    value: TimeUnit.WEEK
+                },
+                {
+                    name: "Day before",
+                    value: TimeUnit.DAY
+                },
+                {
+                    name: "Hour before",
+                    value: TimeUnit.HOUR
+                },
+                {
+                    name: "Minute before",
+                    value: TimeUnit.MINUTE
+                }
+            ]
         };
     },
     computed: {
@@ -139,7 +182,7 @@ export default defineComponent({
             if (this.dueDate && !this.dueTime) {
                 this.dueTime = "0:00";
             }
-        },
+        }
     },
     methods: {
         getDate(dateString: string, timeString: string): Date | undefined {
@@ -148,7 +191,9 @@ export default defineComponent({
                 date = new Date(dateString + "T" + timeString);
             } catch {
                 // invalid string are not reported to user
-                console.log(`Invalid Date or Timestring: '${dateString}','${timeString}'`);
+                console.log(
+                    `Invalid Date or Timestring: '${dateString}','${timeString}'`
+                );
             }
             return date;
         },
@@ -160,7 +205,7 @@ export default defineComponent({
 
             try {
                 // TODO: handle error
-                await this.$store.dispatch("addTask", {
+                const task = (await this.$store.dispatch("addTask", {
                     title: this.name,
                     project: this.project,
                     board: this.board,
@@ -169,7 +214,29 @@ export default defineComponent({
                     due: this.getDate(this.dueDate, this.dueTime),
                     location: this.location,
                     parent_task: this.parentTask?.id,
-                } as Create<Task>);
+                    categories: [],
+                    labels: []
+                } as Create<Task>)) as Task;
+
+                if (
+                    this.reminderValue &&
+                    Number.isInteger(this.reminderValue) &&
+                    this.reminderValue > 0
+                ) {
+                    const secondsOffset =
+                        this.reminderValue * this.reminderUnit;
+                    const targetDate = task.due || task.start;
+
+                    if (targetDate) {
+                        const date = new Date(targetDate);
+                        date.setSeconds(date.getSeconds() - secondsOffset);
+                        // TODO: create and post reminder
+                        await this.$store.dispatch("addReminder", {
+                            task: task.id,
+                            when: date,
+                        } as Create<Reminder>);
+                    }
+                }
 
                 this.name = "";
 
