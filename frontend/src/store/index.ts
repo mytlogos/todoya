@@ -1,6 +1,6 @@
 import { Board, Category, Create, Entity, HttpClient, Label, Project, Reminder, reyhydrateDate, Task } from "@/client";
 import { VuexStore } from "@/siteTypes";
-import { createLogger, createStore } from "vuex";
+import { Commit, createLogger, createStore, Dispatch } from "vuex";
 import persistedState from "vuex-persistedstate";
 
 function remove<T>(list: T[], value: T) {
@@ -23,18 +23,48 @@ async function sync<T extends Entity>(online: Promise<Array<T>>, current: T[], c
   // add all new values separately
   await Promise.all(
     current
-      .filter(value => !ids.has(value.id))
+      .filter(value => value && !ids.has(value.id))
       .map(value => create(value).then(created => onlineValues.push(created)))
   );
 
   return onlineValues;
 }
 
+function notifyReminder(getters: any, reminder: Reminder, state: VuexStore, commit: Commit, dispatch: Dispatch) {
+  const value = state.reminderNotifications[reminder.id];
+
+  if (!value || !value.finished) {
+    const now = new Date();
+    const msTillNotification = reminder.when < now ? 0 : reminder.when.getTime() - now.getTime();
+    console.log(`Notify in: ${msTillNotification} milliseconds`)
+
+    commit("updateReminderNotification", {
+      id: reminder.id,
+      timeoutId: setTimeout(() => {
+        if (Notification.permission === "denied") {
+          console.error("Cannot show Reminder Notification: Permission denied");
+          return;
+        }
+        const task = getters.getTask(reminder.task) as Task;
+        const notification = new Notification(task.title, {
+          requireInteraction: true
+        });
+        notification.addEventListener("close", () => dispatch("removeReminder", reminder.id))
+      }, msTillNotification),
+    });
+  }
+}
+
 export default createStore({
+  devtools: true,
   plugins: [
     createLogger(),
     persistedState({
       rehydrated: store => {
+        // remove ids as they are now invalid
+        for (const value of Object.values(store.state.reminderNotifications)) {
+          value.timeoutId = 0;
+        }
         // rehydrate dates
         // @ts-expect-error
         reyhydrateDate(store.state.tasks, "start", "due", "completion_date");
@@ -51,6 +81,8 @@ export default createStore({
     reminders: {},
     categories: [],
     labels: [],
+    reminderNotifications: {},
+    notificationsSettings: { requested: false }
   }),
   getters: {
     getBoards: (state) => (projectId: number): Board[] => {
@@ -153,6 +185,22 @@ export default createStore({
     removeReminder(state, value: Reminder) {
       remove(state.reminders[value.task] || [], value);
     },
+    updateReminderNotification(state, value: any) {
+      state.reminderNotifications[value.id] = value;
+    },
+    finishReminderNotification(state, id: number) {
+      if (!state.reminderNotifications[id]) {
+        console.error("Cannot finish reminder notification: None available");
+      } else {
+        state.reminderNotifications[id].finished = true;
+      }
+    },
+    removeReminderNotification(state, id: number) {
+      delete state.reminderNotifications[id];
+    },
+    notifications(state, value: any) {
+      state.notificationsSettings = value;
+    }
   },
   actions: {
     async addTask({ commit, state }, task: Create<Task>): Promise<Task> {
@@ -217,7 +265,7 @@ export default createStore({
       commit("addLabel", label);
       return label as Label;
     },
-    async addReminder({ commit, state }, reminder: Create<Reminder>): Promise<Reminder> {
+    async addReminder({ commit, state, getters, dispatch }, reminder: Create<Reminder>): Promise<Reminder> {
       try {
         reminder = await HttpClient.postApiReminders(reminder);
       } catch (error) {
@@ -226,9 +274,25 @@ export default createStore({
         reminder.id = nextId(Object.values(state.reminders).flat());
       }
       commit("addReminder", reminder);
+      notifyReminder(getters, reminder as Reminder, state, commit, dispatch);
       return reminder as Reminder;
     },
-    async sync({ commit, state }) {
+    async removeReminder({ commit, state }, reminderId: number): Promise<void> {
+      try {
+        await HttpClient.deleteApiRemindersbyId(reminderId);
+      } catch (error) {
+        console.error(error);
+      }
+      for (const values of Object.values(state.reminders)) {
+        const reminder = values.find(value => value && value.id === reminderId);
+        if (reminder) {
+          commit("removeReminder", reminder);
+          break;
+        }
+      }
+      commit("removeReminderNotification", reminderId);
+    },
+    async sync({ commit, state, getters, dispatch }) {
       const projects = await sync(HttpClient.getApiProjects(), state.projects, value => HttpClient.postApiProjects(value));
       commit("setProjects", projects);
 
@@ -245,6 +309,7 @@ export default createStore({
       commit("setLabels", labels);
 
       const reminders = await sync(HttpClient.getApiReminders(), Object.values(state.reminders).flat(), value => HttpClient.postApiReminders(value));
+      reminders.forEach(reminder => notifyReminder(getters, reminder, state, commit, dispatch));
       commit("setReminders", reminders);
     }
   },

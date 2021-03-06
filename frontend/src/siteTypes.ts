@@ -8,4 +8,6 @@ export interface VuexStore {
     reminders: Record<number, Reminder[]>;
     categories: Category[];
     labels: Label[];
+    reminderNotifications: Record<number, {id: number; timeoutId: number, finished: boolean}>;
+    notificationsSettings: { requested: boolean };
 }
