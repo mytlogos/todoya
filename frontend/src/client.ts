@@ -227,7 +227,7 @@ export const HttpClient = {
         return this.queryServer(api.api_projects_.post, value);
     },
 
-    deleteApiProjectsbyId(): Promise<unknown> {
+    deleteApiProjectsbyId(): Promise<void> {
         return this.queryServer(api["api_projects_{id}_"].delete);
     },
 
@@ -247,7 +247,7 @@ export const HttpClient = {
         return this.queryServer(api.api_boards_.post, value);
     },
 
-    deleteApiBoardsbyId(): Promise<unknown> {
+    deleteApiBoardsbyId(): Promise<void> {
         return this.queryServer(api["api_boards_{id}_"].delete);
     },
 
@@ -272,7 +272,7 @@ export const HttpClient = {
             .then((tasks: Task) => reyhydrateDate(tasks, "start", "due", "completion_date") as Task);
     },
 
-    deleteApiTasksbyId(): Promise<unknown> {
+    deleteApiTasksbyId(): Promise<void> {
         return this.queryServer(api["api_tasks_{id}_"].delete);
     },
 
@@ -297,8 +297,8 @@ export const HttpClient = {
             .then((reminders: Reminder) => reyhydrateDate(reminders, "when") as Reminder);
     },
 
-    deleteApiRemindersbyId(): Promise<unknown> {
-        return this.queryServer(api["api_reminders_{id}_"].delete);
+    deleteApiRemindersbyId(id: number): Promise<void> {
+        return this.queryServer(api["api_reminders_{id}_"].delete, { id });
     },
 
     getApiRemindersbyId(id: number): Promise<Reminder> {
@@ -317,7 +317,7 @@ export const HttpClient = {
         return this.queryServer(api.api_categories_.post, value);
     },
 
-    deleteApiCategoriesbyId(): Promise<unknown> {
+    deleteApiCategoriesbyId(): Promise<void> {
         return this.queryServer(api["api_categories_{id}_"].delete);
     },
 
@@ -337,7 +337,7 @@ export const HttpClient = {
         return this.queryServer(api.api_labels_.post, value);
     },
 
-    deleteApiLabelsbyId(): Promise<unknown> {
+    deleteApiLabelsbyId(): Promise<void> {
         return this.queryServer(api["api_labels_{id}_"].delete);
     },
 
@@ -378,8 +378,11 @@ export const HttpClient = {
             }
         }
         const response = await fetch(url.toString(), init);
-        const result = await response.json();
-        if (result.error) {
+        const text = await response.text();
+        // some HTTP Requests (like Delete) may not return any content
+        const result = text ? JSON.parse(text) : undefined;
+
+        if (result && result.error) {
             return Promise.reject(result.error);
         }
         return result;
