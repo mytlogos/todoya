@@ -17,6 +17,51 @@
                 type="text"
                 placeholder="Name"
             />
+            <div>
+                <div class="dropdown d-inline-block">
+                    <button
+                        class="btn btn-secondary dropdown-toggle"
+                        type="button"
+                        id="dropdownPushTaskLabelMenu"
+                        data-toggle="dropdown"
+                        aria-expanded="false"
+                    >
+                        Label
+                    </button>
+                    <ul
+                        class="dropdown-menu"
+                        aria-labelledby="dropdownPushTaskLabelMenu"
+                    >
+                        <li v-for="label in $store.state.labels" :key="label">
+                            <a
+                                class="dropdown-item"
+                                href="#"
+                                @click="addLabel(label)"
+                            >
+                                <span
+                                    class="badge"
+                                    :style="`background-color: ${label.color};`"
+                                >
+                                    {{ label.title }}
+                                </span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <i
+                    class="btn fas fa-plus bg-danger text-white" style="font-size: 1.5em; margin-left: 0.2em"
+                    @click="showAddLabel = true"
+                />
+                <div class="label-container">
+                    <span
+                        v-for="label in labels"
+                        :key="label"
+                        :style="`background-color: ${label.color}; font-size: 100%;`"
+                        class="badge"
+                        >{{ label.title }}</span
+                    >
+                </div>
+            </div>
             <select v-model="project" class="custom-select">
                 <option selected>Select Project of Task</option>
                 <option
@@ -93,13 +138,21 @@
             />
         </template>
     </modal>
+    <teleport to="body">
+        <add-label
+            :show="showAddLabel"
+            @close="showAddLabel = false"
+            @finish="addLabel($event)"
+        />
+    </teleport>
 </template>
 
 <script lang="ts">
-import { Board, Create, Reminder, Task } from "@/client";
+import { Board, Create, Label, Reminder, Task } from "@/client";
 import { defineComponent } from "vue";
 import modal from "./modal.vue";
 import $ from "jquery";
+import AddLabel from "./add-label.vue";
 
 enum TimeUnit {
     SECOND = 1,
@@ -117,13 +170,14 @@ export default defineComponent({
         show: Boolean
     },
     emits: ["finish", "close"],
-    components: { modal },
+    components: { modal, AddLabel },
     data() {
         const project = this.$store.getters.getFirstProject;
         const board = project
             ? this.$store.getters.getBoards(project.id)[0]
             : null;
         return {
+            showAddLabel: false,
             name: "",
             project: project?.id || (null as null | number),
             board: board?.id || (null as null | number),
@@ -137,6 +191,7 @@ export default defineComponent({
             parentTask: null as null | Task,
             reminderValue: null as null | number,
             reminderUnit: TimeUnit.DAY,
+            labels: [] as Label[],
             possibleReminder: [
                 {
                     name: "Week before",
@@ -185,6 +240,11 @@ export default defineComponent({
         }
     },
     methods: {
+        addLabel(label: Label) {
+            if (!this.labels.includes(label)) {
+                this.labels.push(label);
+            }
+        },
         getDate(dateString: string, timeString: string): Date | undefined {
             let date;
             try {
@@ -215,7 +275,7 @@ export default defineComponent({
                     location: this.location,
                     parent_task: this.parentTask?.id,
                     categories: [],
-                    labels: []
+                    labels: this.labels.map(value => value.id)
                 } as Create<Task>)) as Task;
 
                 if (
@@ -233,7 +293,7 @@ export default defineComponent({
                         // TODO: create and post reminder
                         await this.$store.dispatch("addReminder", {
                             task: task.id,
-                            when: date,
+                            when: date
                         } as Create<Reminder>);
                     }
                 }

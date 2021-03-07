@@ -174,7 +174,7 @@ export interface Board extends Entity {
 
 export interface Label extends Entity {
     title: string;
-    project?: number;
+    color: string;
 }
 
 export interface Reminder extends Entity {
@@ -192,8 +192,8 @@ export interface Task extends Entity {
     board?: number;
     project: number;
     parent_task?: Task | null;
-    categories: Category[];
-    labels: Label[];
+    categories: number[];
+    labels: number[];
 }
 
 export interface Category extends Entity {

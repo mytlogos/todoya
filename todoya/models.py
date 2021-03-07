@@ -17,6 +17,7 @@ class Category(models.Model):
 
 class Label(models.Model):
     title = models.TextField()
+    color = models.TextField()
 
 
 class Task(models.Model):
