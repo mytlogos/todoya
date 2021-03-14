@@ -299,6 +299,7 @@ export default defineComponent({
                 }
 
                 this.name = "";
+                this.description = "";
 
                 this.$emit("finish");
                 this.$emit("close");
