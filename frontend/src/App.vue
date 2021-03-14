@@ -12,6 +12,7 @@
                 Allow Notifications
             </template>
         </modal>
+        <confirm-modal />
     </div>
 </template>
 
@@ -19,12 +20,14 @@
 import { defineComponent } from "vue";
 import AppHeader from "@/components/app-header.vue";
 import Modal from "./components/modals/modal.vue";
+import ConfirmModal from "./components/modals/confirm-modal.vue";
 
 export default defineComponent({
     name: "Home",
     components: {
         AppHeader,
-        Modal
+        Modal,
+        ConfirmModal,
     },
     async created() {
         await this.$store.dispatch("sync");

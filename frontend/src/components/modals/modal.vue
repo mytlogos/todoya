@@ -18,23 +18,23 @@
                 </div>
                 <div class="modal-body">
                     <slot name="body" />
-                    <div class="modal-footer">
-                        <button
-                            type="button"
-                            class="btn btn-secondary"
-                            data-dismiss="modal"
-                            @click.left="$emit('close')"
-                        >
-                            Close
-                        </button>
-                        <button
-                            type="button"
-                            class="btn btn-primary"
-                            @click.left="$emit('submit')"
-                        >
-                            Save
-                        </button>
-                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-dismiss="modal"
+                        @click.left="$emit('close')"
+                    >
+                        <slot name="close">Close</slot>
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-primary"
+                        @click.left="$emit('submit')"
+                    >
+                        <slot name="submit">Save</slot>
+                    </button>
                 </div>
             </div>
         </div>

@@ -26,6 +26,7 @@
 import { Task } from "@/client";
 import ContextMenu, { ContextMenuItem } from "@/components/context-menu.vue";
 import taskItem from "@/components/task-item.vue";
+import { ConfirmationModal } from "@/siteTypes";
 import { defineComponent } from "vue";
 
 export default defineComponent({
@@ -55,13 +56,23 @@ export default defineComponent({
             if (!this.contextTaskId) {
                 return [];
             }
+            const that = this; // eslint-disable-line @typescript-eslint/no-this-alias
             const currentId = this.contextTaskId;
             const store = this.$store;
             return [
                 {
                     title: "Delete Task",
                     onClick() {
-                        store.dispatch("deleteTask", currentId);
+                        const task = store.getters.getTask(currentId)
+                        store.commit("setConfirmationModal", {
+                            title: `Are you sure you want to delete the Task: \n"${task?.title}" ?`,
+                            onConfirm() {
+                                store.dispatch("deleteTask", currentId);
+                            },
+                            onChoice() {
+                                that.contextTaskId = null;
+                            }
+                        } as ConfirmationModal);
                     }
                 }
             ];
@@ -69,7 +80,6 @@ export default defineComponent({
     },
     methods: {
         onContextClick(event: MouseEvent, taskId: number) {
-            console.log(taskId, event.x, event.y, event);
             this.contextX = event.x;
             this.contextY = event.y;
             this.contextTaskId = taskId;

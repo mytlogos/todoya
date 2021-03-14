@@ -31,7 +31,6 @@ export default defineComponent({
     },
     computed: {
         style(): any {
-            console.log("left and top: ", this.startX, this.startY)
             return {
                 top: this.startY + "px",
                 left: this.startX + "px",

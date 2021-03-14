@@ -1,5 +1,11 @@
 import { Board, Category, Label, Project, Reminder, Task } from "./client";
 
+export interface ConfirmationModal {
+    title: string;
+    onConfirm: () => void;
+    onChoice: () => void;
+}
+
 export interface VuexStore {
     projects: Project[];
     boards: Board[];
@@ -11,4 +17,5 @@ export interface VuexStore {
     reminderNotifications: Record<number, {id: number; timeoutId: number, finished: boolean}>;
     notificationsSettings: { requested: boolean };
     editTask: null | number;
+    confirmationModal: null | ConfirmationModal;
 }

@@ -69,6 +69,9 @@ export default createStore({
     createLogger(),
     persistedState({
       rehydrated: store => {
+        // always destroy any confirmationsmodal
+        store.state.confirmationModal = null
+
         // remove ids as they are now invalid
         for (const value of Object.values(store.state.reminderNotifications)) {
           value.timeoutId = 0;
@@ -92,6 +95,7 @@ export default createStore({
     reminderNotifications: {},
     notificationsSettings: { requested: false },
     editTask: null,
+    confirmationModal: null,
   }),
   getters: {
     getBoards: (state) => (projectId: number): Board[] => {
@@ -226,6 +230,9 @@ export default createStore({
     },
     notifications(state, value: any) {
       state.notificationsSettings = value;
+    },
+    setConfirmationModal(state, value: any) {
+      state.confirmationModal = value;
     }
   },
   actions: {
