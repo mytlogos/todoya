@@ -82,7 +82,8 @@ export default createStore({
     categories: [],
     labels: [],
     reminderNotifications: {},
-    notificationsSettings: { requested: false }
+    notificationsSettings: { requested: false },
+    editTask: null,
   }),
   getters: {
     getBoards: (state) => (projectId: number): Board[] => {
@@ -131,6 +132,9 @@ export default createStore({
         state.selectedProjects = index < 0 ? [project.id] : [];
       }
     },
+    editTask(state, taskId: number | null) {
+      state.editTask = taskId;
+    },
     setTasks(state, tasks: Task[]) {
       state.tasks = tasks;
     },
@@ -145,6 +149,8 @@ export default createStore({
 
       if (found) {
         Object.assign(found, task);
+      } else {
+        throw Error("Cannot update Task, does not exist");
       }
     },
     setBoards(state, boards: Board[]) {
@@ -221,6 +227,16 @@ export default createStore({
       }
       commit("addTask", task);
       return task as Task;
+    },
+    async updateTask({ commit }, task: Task): Promise<Task | null> {
+      try {
+        await HttpClient.putApiTasksbyId(task);
+        commit("updateTask", task);
+        return task;
+      } catch (error) {
+        console.error(error);
+        return null;
+      }
     },
     async updateBoardTasks({ commit }, payload: { items: Task[], boardId: number }) {
       const toChangeItems = await Promise.all(payload.items.filter(value => value.board !== payload.boardId).map(task => {

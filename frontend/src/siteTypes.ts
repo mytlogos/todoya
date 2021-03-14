@@ -10,4 +10,5 @@ export interface VuexStore {
     labels: Label[];
     reminderNotifications: Record<number, {id: number; timeoutId: number, finished: boolean}>;
     notificationsSettings: { requested: boolean };
+    editTask: null | number;
 }

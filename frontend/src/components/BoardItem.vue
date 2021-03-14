@@ -1,15 +1,18 @@
 <template>
-    <div class="board-task card shadow-sm p-1">
+    <div
+        class="board-task card shadow-sm p-1"
+        role="button"
+        @click="$store.commit('editTask', item.id)"
+    >
         <div class="label-container">
             <span
                 v-for="label in labels"
                 :key="label"
-                :style="
-                    `background-color: ${label.color};`
-                "
+                :style="`background-color: ${label.color};`"
                 class="badge"
-                >{{ label.title }}</span
             >
+                {{ label.title }}
+            </span>
         </div>
         <span class="card-title">{{ item.title }}</span>
     </div>
@@ -29,14 +32,16 @@ export default defineComponent({
     },
     computed: {
         labels(): Label[] {
-            return this.$store.state.labels.filter(label => this.item.labels.includes(label.id))
-        },
+            return this.$store.state.labels.filter(label =>
+                this.item.labels.includes(label.id)
+            );
+        }
     }
 });
 </script>
 
 <style>
 .label-container .badge ~ .badge {
-	margin-left: 0.5em;
+    margin-left: 0.5em;
 }
 </style>
