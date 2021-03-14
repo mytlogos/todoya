@@ -116,7 +116,7 @@ export default createStore({
       state.projects.push(project);
     },
     removeProject(state, project: Project) {
-      remove(state.boards, project);
+      remove(state.projects, project);
     },
     toggleProjectSelect(state, { project, multi }: { project: Project, multi: boolean }) {
       const index = state.selectedProjects.indexOf(project.id);
@@ -245,7 +245,7 @@ export default createStore({
     },
     async addCategory({ commit, state }, category: Create<Category>): Promise<Category> {
       try {
-        category = await HttpClient.postApiBoards(category);
+        category = await HttpClient.postApiCategories(category);
       } catch (error) {
         console.error(error);
         // generate temporary id when it fails
