@@ -49,14 +49,17 @@
                     </ul>
                 </div>
                 <i
-                    class="btn fas fa-plus bg-danger text-white" style="font-size: 1.5em; margin-left: 0.2em"
+                    class="btn fas fa-plus bg-danger text-white"
+                    style="font-size: 1.5em; margin-left: 0.2em"
                     @click="showAddLabel = true"
                 />
                 <div class="label-container">
                     <span
                         v-for="label in labels"
                         :key="label"
-                        :style="`background-color: ${label.color}; font-size: 100%;`"
+                        :style="
+                            `background-color: ${label.color}; font-size: 100%;`
+                        "
                         class="badge"
                         >{{ label.title }}</span
                     >
@@ -168,25 +171,25 @@ export default defineComponent({
     name: "EditTaskModal",
     props: {
         show: Boolean,
-        taskId: Number,
+        taskId: Number
     },
     emits: ["finish", "close"],
     components: { modal, AddLabel },
     data() {
-        const task = this.$store.getters.getTask(this.taskId) as Task | undefined;
+        const task: Task | undefined = this.$store.getters.getTask(this.taskId);
 
         return {
             showAddLabel: false,
             submitting: false,
-            name: task?.title,
+            name: task?.title || "",
             project: task?.project,
             board: task?.board,
-            description: task?.description,
+            description: task?.description || "",
             startDate: null as null | any,
             startTime: null as null | any,
             dueDate: null as null | any,
             dueTime: null as null | any,
-            location: task?.location,
+            location: task?.location || "",
             parentTask: task?.parent_task as null | Task,
             labels: [] as Label[],
             reminderValue: null as null | number,
@@ -220,7 +223,7 @@ export default defineComponent({
         },
         task(): Task | undefined {
             return this.$store.getters.getTask(this.taskId) as Task | undefined;
-        },
+        }
     },
     mounted() {
         $("#add-task-modal").on("shown.bs.modal", () =>
@@ -229,10 +232,11 @@ export default defineComponent({
     },
     watch: {
         task(task) {
-            this.name = task?.title;
+            this.name = task?.title || "";
             this.project = task?.project;
             this.board = task?.board;
-            this.location = task?.location;
+            this.location = task?.location || "";
+            this.description = task?.description || "";
             this.parentTask = task?.parent_task as null | Task;
         },
         startDate() {
