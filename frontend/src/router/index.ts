@@ -10,6 +10,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "/list",
         name: "ListView",
+        props: route => ({view: Number.parseInt(route.query.view as string)}),
         component: () => import(/* webpackChunkName: "listview" */ "../views/ListView.vue")
       },
       {

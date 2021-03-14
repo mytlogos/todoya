@@ -4,26 +4,22 @@
             <div class="m-2">Views</div>
             <ul class="list-group list-group-flush">
                 <router-link
-                    class="list-group-item list-group-item-action"
-                    :to="{ name: 'ListView' }"
+                    :to="{ name: 'ListView', query: { view: 0 } }"
                     tag="a"
                     >Today</router-link
                 >
                 <router-link
-                    class="list-group-item list-group-item-action"
-                    :to="{ name: 'ListView' }"
+                    :to="{ name: 'ListView', query: { view: 1 } }"
                     tag="a"
                     >Tomorrow</router-link
                 >
                 <router-link
-                    class="list-group-item list-group-item-action"
-                    :to="{ name: 'ListView' }"
+                    :to="{ name: 'ListView', query: { view: 2 } }"
                     tag="a"
                     >Next Week</router-link
                 >
                 <router-link
-                    class="list-group-item list-group-item-action"
-                    :to="{ name: 'ListView' }"
+                    :to="{ name: 'ListView', query: { view: 3 } }"
                     tag="a"
                     >All</router-link
                 >
