@@ -273,8 +273,8 @@ export const HttpClient = {
             .then((tasks: Task) => reyhydrateDate(tasks, "start", "due", "completion_date") as Task);
     },
 
-    deleteApiTasksbyId(): Promise<void> {
-        return this.queryServer(api["api_tasks_{id}_"].delete);
+    deleteApiTasksbyId(id: number): Promise<void> {
+        return this.queryServer(api["api_tasks_{id}_"].delete, { id });
     },
 
     getApiTasksbyId(): Promise<Task> {

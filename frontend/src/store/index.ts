@@ -10,6 +10,14 @@ function remove<T>(list: T[], value: T) {
   }
 }
 
+function removeEntity<T extends Entity>(list: T[], id: number) {
+  const index = list.findIndex(value => value.id === id);
+
+  if (index >= 0) {
+    list.splice(index, 1);
+  }
+}
+
 function nextId<T extends Entity>(entities: T[]): number {
   let maxId = 0;
   entities.forEach(value => value.id > maxId ? maxId = value.id : undefined);
@@ -141,8 +149,12 @@ export default createStore({
     addTask(state, task: Task) {
       state.tasks.push(task);
     },
-    removeTask(state, board: Board) {
-      remove(state.boards, board);
+    removeTask(state, task: Task | number) {
+      if (Number.isInteger(task)) {
+        removeEntity(state.tasks, task as number);
+      } else {
+        remove(state.tasks, task);
+      }
     },
     updateTask(state, task: Task) {
       const found = state.tasks.find(value => task.id === value.id);
@@ -237,6 +249,10 @@ export default createStore({
         console.error(error);
         return null;
       }
+    },
+    async deleteTask({ commit }, taskId: number): Promise<void> {
+      await HttpClient.deleteApiTasksbyId(taskId);
+      commit("removeTask", taskId);
     },
     async updateBoardTasks({ commit }, payload: { items: Task[], boardId: number }) {
       const toChangeItems = await Promise.all(payload.items.filter(value => value.board !== payload.boardId).map(task => {
