@@ -6,6 +6,13 @@ export interface ConfirmationModal {
     onChoice: () => void;
 }
 
+export interface AddTaskModal {
+    onConfirm?: () => void;
+    onChoice?: () => void;
+    project?: number;
+    board?: number;
+}
+
 export interface VuexStore {
     projects: Project[];
     boards: Board[];
@@ -18,4 +25,5 @@ export interface VuexStore {
     notificationsSettings: { requested: boolean };
     editTask: null | number;
     confirmationModal: null | ConfirmationModal;
+    addTaskModal: null | AddTaskModal | boolean;
 }

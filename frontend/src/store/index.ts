@@ -96,6 +96,7 @@ export default createStore({
     notificationsSettings: { requested: false },
     editTask: null,
     confirmationModal: null,
+    addTaskModal: null,
   }),
   getters: {
     getBoards: (state) => (projectId: number): Board[] => {
@@ -233,6 +234,9 @@ export default createStore({
     },
     setConfirmationModal(state, value: any) {
       state.confirmationModal = value;
+    },
+    setAddTaskModal(state, value: any) {
+      state.addTaskModal = value;
     }
   },
   actions: {

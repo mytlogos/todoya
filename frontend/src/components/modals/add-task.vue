@@ -3,7 +3,7 @@
         id="add-task-modal"
         :show="show"
         @submit="submitted"
-        @close="$emit('close')"
+        @close="close"
         @keyup.enter.ctrl="submitted"
     >
         <template v-slot:title>
@@ -49,14 +49,17 @@
                     </ul>
                 </div>
                 <i
-                    class="btn fas fa-plus bg-danger text-white" style="font-size: 1.5em; margin-left: 0.2em"
+                    class="btn fas fa-plus bg-danger text-white"
+                    style="font-size: 1.5em; margin-left: 0.2em"
                     @click="showAddLabel = true"
                 />
                 <div class="label-container">
                     <span
                         v-for="label in labels"
                         :key="label"
-                        :style="`background-color: ${label.color}; font-size: 100%;`"
+                        :style="
+                            `background-color: ${label.color}; font-size: 100%;`
+                        "
                         class="badge"
                         >{{ label.title }}</span
                     >
@@ -148,11 +151,12 @@
 </template>
 
 <script lang="ts">
-import { Board, Create, Label, Reminder, Task } from "@/client";
+import { Board, Create, Label, Project, Reminder, Task } from "@/client";
 import { defineComponent } from "vue";
 import modal from "./modal.vue";
 import $ from "jquery";
 import AddLabel from "./add-label.vue";
+import { AddTaskModal } from "@/siteTypes";
 
 enum TimeUnit {
     SECOND = 1,
@@ -166,21 +170,35 @@ enum TimeUnit {
 
 export default defineComponent({
     name: "AddTaskModal",
-    props: {
-        show: Boolean
-    },
     emits: ["finish", "close"],
     components: { modal, AddLabel },
     data() {
-        const project = this.$store.getters.getFirstProject;
-        const board = project
-            ? this.$store.getters.getBoards(project.id)[0]
-            : null;
+        let projectId: undefined | number;
+        let boardId: undefined | number;
+
+        // webpack did not transpile typeof correctly so check if it is a value
+        if (
+            this.$store.state.addTaskModal &&
+            typeof this.$store.state.addTaskModal === "object"
+        ) {
+            const value = this.$store.state.addTaskModal as AddTaskModal;
+
+            projectId = value.project;
+            boardId = projectId && value.board;
+        }
+
+        if (!projectId) {
+            projectId = this.$store.getters.getFirstProject?.id;
+        }
+
+        if (!boardId && projectId && typeof projectId === "object") {
+            boardId = this.$store.getters.getBoards(projectId)[0]?.id;
+        }
         return {
             showAddLabel: false,
             name: "",
-            project: project?.id || (null as null | number),
-            board: board?.id || (null as null | number),
+            project: projectId,
+            board: boardId,
             description: "",
             startDate: null as null | any,
             startTime: null as null | any,
@@ -213,6 +231,12 @@ export default defineComponent({
         };
     },
     computed: {
+        modalValue(): AddTaskModal | null | boolean {
+            return this.$store.state.addTaskModal;
+        },
+        show(): boolean {
+            return this.$store.state.addTaskModal !== null;
+        },
         boards(): Board[] {
             return this.$store.getters.getBoards(this.project);
         },
@@ -226,6 +250,19 @@ export default defineComponent({
         );
     },
     watch: {
+        modalValue() {
+            // webpack did not transpile typeof correctly so check if it is a value
+            if (this.modalValue && typeof this.modalValue === "object") {
+                this.project = this.modalValue.project;
+                this.board = this.project && this.modalValue.board;
+            } else {
+                this.project = this.$store.getters.getFirstProject?.id;
+
+                if (!this.board && this.project) {
+                    this.board = this.$store.getters.getBoards(this.project)[0]?.id;
+                }
+            }
+        },
         startDate() {
             // automatically set time to 0:00 if not set yet
             if (this.startDate && !this.startTime) {
@@ -256,6 +293,10 @@ export default defineComponent({
                 );
             }
             return date;
+        },
+        close() {
+            this.$emit("close");
+            this.$store.commit("setAddTaskModal", null);
         },
         async submitted() {
             if (this.submitting) {
@@ -302,9 +343,9 @@ export default defineComponent({
                 this.description = "";
 
                 this.$emit("finish");
-                this.$emit("close");
             } finally {
                 this.submitting = false;
+                this.close();
             }
         }
     }

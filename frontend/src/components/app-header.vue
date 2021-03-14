@@ -31,7 +31,7 @@
                     </a>
                 </li>
                 <li>
-                    <a class="nav-link btn" @click.left="showAddTask = true">
+                    <a class="nav-link btn" @click.left="$store.state.addTaskModal = true">
                         Add Task
                     </a>
                 </li>
@@ -46,7 +46,7 @@
     <teleport to="body">
         <add-project :show="showAddProject" @close="showAddProject = false" />
         <add-board :show="showAddBoard" @close="showAddBoard = false" />
-        <add-task :show="showAddTask" @close="showAddTask = false" />
+        <add-task />
     </teleport>
 </template>
 
@@ -62,8 +62,7 @@ export default defineComponent({
     data() {
         return {
             showAddProject: false,
-            showAddBoard: false,
-            showAddTask: false
+            showAddBoard: false
         };
     }
 });
