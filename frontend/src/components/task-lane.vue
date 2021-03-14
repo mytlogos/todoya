@@ -3,8 +3,12 @@
         <div
             class="card-header d-flex justify-content-between align-content-center"
         >
-            <span class="font-weight-bold align-middle">{{ board.title }}</span>
-            <div>
+            <editable-text
+                @submit="updateBoardTitle"
+                v-model="title"
+                class="flex-fill font-weight-bold align-middle"
+            />
+            <div class="text-nowrap">
                 <button
                     class="fas fa-plus btn btn-sm text-black-50"
                     role="button"
@@ -52,15 +56,21 @@ import { defineComponent, PropType } from "vue";
 import BoardItem from "./BoardItem.vue";
 import VueDraggable from "vuedraggable";
 import { AddTaskModal } from "@/siteTypes";
+import EditableText from "./editable-text.vue";
 
 export default defineComponent({
     name: "TaskLane",
-    components: { BoardItem, VueDraggable },
+    components: { BoardItem, VueDraggable, EditableText },
     props: {
         board: {
             type: Object as PropType<Board>,
             required: true
         }
+    },
+    data() {
+        return {
+            title: this.board.title
+        };
     },
     computed: {
         id(): string {
@@ -84,12 +94,25 @@ export default defineComponent({
                 : `${this.items.length} tasks`;
         }
     },
+    watch: {
+        "board.title"(title) {
+            this.title = title;
+        }
+    },
     methods: {
+        updateBoardTitle() {
+            if (this.title === this.board.title) {
+                return;
+            }
+            this.$store
+                .dispatch("updateBoard", { ...this.board, title: this.title })
+                .catch(console.error);
+        },
         addTask() {
             this.$store.commit("setAddTaskModal", {
                 project: this.board.project,
-                board: this.board.id,
-            } as AddTaskModal)
+                board: this.board.id
+            } as AddTaskModal);
         }
     }
 });
