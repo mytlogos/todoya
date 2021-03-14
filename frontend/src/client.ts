@@ -169,6 +169,7 @@ export interface Project extends Entity {
 
 export interface Board extends Entity {
     title: string;
+    position: number;
     project?: number;
 }
 

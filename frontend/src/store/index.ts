@@ -153,6 +153,14 @@ export default createStore({
     addBoard(state, board: Board) {
       state.boards.push(board);
     },
+    updateBoard(state, board: Board) {
+      const found = state.boards.find(value => value.id === board.id);
+
+      if (!found) {
+        throw Error("Cannot update Board, does not exist");
+      }
+      Object.assign(found, board);
+    },
     removeBoard(state, board: Board) {
       remove(state.boards, board);
     },
@@ -242,6 +250,15 @@ export default createStore({
       }
       commit("addBoard", board);
       return board as Board;
+    },
+    async updateBoard({ commit }, board: Board): Promise<Board> {
+      try {
+        await HttpClient.putApiBoardsbyId(board);
+      } catch (error) {
+        console.error(error);
+      }
+      commit("updateBoard", board);
+      return board;
     },
     async addCategory({ commit, state }, category: Create<Category>): Promise<Category> {
       try {

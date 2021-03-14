@@ -1,31 +1,24 @@
 <template>
     <div>
         <template
-            v-for="project in $store.state.selectedProjects"
-            :key="project"
+            v-for="projectId in $store.state.selectedProjects"
+            :key="projectId"
         >
             <div class="h3 p-2">
-                {{ $store.getters.getProject(project)?.title }}
+                {{ $store.getters.getProject(projectId)?.title }}
             </div>
-            <div class="row m-0">
-                <task-lane
-                    v-for="board in $store.getters.getBoards(project)"
-                    :key="board.id"
-                    :board="board"
-                    class="col-md"
-                />
-            </div>
+            <project-board :id="projectId" class="row m-0" />
         </template>
     </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import TaskLane from "@/components/task-lane.vue";
+import ProjectBoard from "@/components/project-board.vue";
 
 export default defineComponent({
     name: "Board",
-    components: { TaskLane }
+    components: { ProjectBoard },
 });
 </script>
 

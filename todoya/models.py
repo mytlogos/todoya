@@ -8,6 +8,7 @@ class Project(models.Model):
 
 class Board(models.Model):
     title = models.TextField()
+    position = models.IntegerField(default=0)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
 
