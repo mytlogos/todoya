@@ -87,9 +87,10 @@ export default defineComponent({
 </script>
 <style>
 .left-sidebar {
-    border-right: 1px solid rgba(0, 0, 0, 0.1);
+    border-right: 5px solid rgba(0, 0, 0, 0.1);
     width: 10vw;
     overflow-y: auto;
     min-width: 10em;
+    height: calc(100vh - 60px); /* take 100% of viewport height minus the nav header */
 }
 </style>

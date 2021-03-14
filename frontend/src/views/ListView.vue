@@ -39,5 +39,8 @@ export default defineComponent({
 });
 </script>
 
-<style>
+<style scoped>
+.left-sidebar {
+    width: 20em;
+}
 </style>
