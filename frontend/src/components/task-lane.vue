@@ -55,6 +55,9 @@ export default defineComponent({
 .task-lane {
     max-width: 20em;
 }
+.task-lane .board-task ~ .board-task {
+    margin-top: 0.25em;
+}
 .task-lane > .card-body > div {
     min-height: 50px;
     height: 100%;

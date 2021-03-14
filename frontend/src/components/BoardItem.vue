@@ -1,21 +1,17 @@
 <template>
-    <div class="card">
-        <div class="card-block">
-            <div class="label-container">
-                <span
-                    v-for="label in labels"
-                    :key="label"
-                    :style="
-                        `background-color: ${label.color};`
-                    "
-                    class="badge"
-                    >{{ label.title }}</span
-                >
-            </div>
-            <h5 class="card-title">
-                <span class="text-muted">#{{ item.id }}</span> {{ item.title }}
-            </h5>
+    <div class="board-task card shadow-sm p-1">
+        <div class="label-container">
+            <span
+                v-for="label in labels"
+                :key="label"
+                :style="
+                    `background-color: ${label.color};`
+                "
+                class="badge"
+                >{{ label.title }}</span
+            >
         </div>
+        <span class="card-title">{{ item.title }}</span>
     </div>
 </template>
 
@@ -40,4 +36,7 @@ export default defineComponent({
 </script>
 
 <style>
+.label-container .badge ~ .badge {
+	margin-left: 0.5em;
+}
 </style>

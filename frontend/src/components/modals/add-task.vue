@@ -12,7 +12,7 @@
         <template v-slot:body>
             <input
                 id="task-name"
-                class="custom-control"
+                class="form-control"
                 v-model="name"
                 type="text"
                 placeholder="Name"
@@ -132,7 +132,7 @@
             </div>
             <textarea
                 v-model="description"
-                class="custom-control"
+                class="custom-control w-100"
                 placeholder="Description"
                 rows="5"
             />
