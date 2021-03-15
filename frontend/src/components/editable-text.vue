@@ -3,14 +3,16 @@
         <input
             @blur="submit"
             @submit="submit"
-            @keyup.enter.ctrl="submit"
+            @keyup.enter.ctrl.stop="submit"
             class="form-control"
             :type="type"
             v-model="value"
         />
     </template>
     <template v-else>
-        <span @click="startEdit" role="button" class="pl-1">{{ modelValue }}</span>
+        <span @click="startEdit" role="button" class="pl-1">{{
+            modelValue
+        }}</span>
     </template>
 </template>
 
@@ -25,7 +27,8 @@ export default defineComponent({
     emits: ["update:modelValue", "submit"],
     data() {
         return {
-            edit: false
+            edit: false,
+            currentValue: this.modelValue
         };
     },
     computed: {
@@ -34,6 +37,7 @@ export default defineComponent({
                 return this.modelValue;
             },
             set(value: string) {
+                this.currentValue = value;
                 this.$emit("update:modelValue", value);
             }
         }
@@ -46,7 +50,7 @@ export default defineComponent({
             });
         },
         submit() {
-            this.$emit("submit");
+            this.$emit("submit", this.currentValue);
             this.edit = false;
         }
     }
