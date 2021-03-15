@@ -26,6 +26,8 @@ router.register(r'tasks', views.TaskViewSet)
 router.register(r'categories', views.CategoryViewSet)
 router.register(r'labels', views.LabelViewSet)
 router.register(r'reminders', views.ReminderViewSet)
+router.register(r'checkItems', views.CheckItemViewSet)
+router.register(r'checkLists', views.CheckListViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),

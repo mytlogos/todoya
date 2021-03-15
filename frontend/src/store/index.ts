@@ -1,4 +1,4 @@
-import { Board, Category, Create, Entity, HttpClient, Label, Project, Reminder, reyhydrateDate, Task } from "@/client";
+import { Board, Category, CheckList, CheckItem, Create, Entity, HttpClient, Label, Project, Reminder, reyhydrateDate, Task } from "@/client";
 import { VuexStore } from "@/siteTypes";
 import { Commit, createLogger, createStore, Dispatch } from "vuex";
 import persistedState from "vuex-persistedstate";
@@ -63,6 +63,16 @@ function notifyReminder(getters: any, reminder: Reminder, state: VuexStore, comm
   }
 }
 
+function findCheckList(checkLists: Record<number, CheckList[]>, checkListId: number): CheckList | undefined {
+  for (const value of Object.values(checkLists)) {
+    const found = value.find(list => list.id === checkListId);
+
+    if (found) {
+      return found;
+    }
+  }
+}
+
 export default createStore({
   devtools: true,
   plugins: [
@@ -97,6 +107,7 @@ export default createStore({
     editTask: null,
     confirmationModal: null,
     addTaskModal: null,
+    checkLists: {},
   }),
   getters: {
     getBoards: (state) => (projectId: number): Board[] => {
@@ -120,6 +131,9 @@ export default createStore({
     },
     getBoard: (state) => (id: number): undefined | Board => {
       return state.boards.find(value => id === value.id);
+    },
+    getCheckLists: (state) => (id: number): undefined | CheckList[] => {
+      return state.checkLists[id] || [];
     },
   },
   mutations: {
@@ -237,6 +251,69 @@ export default createStore({
     },
     setAddTaskModal(state, value: any) {
       state.addTaskModal = value;
+    },
+    setCheckLists(state, checkLists: CheckList[]) {
+      const mapping: Record<number, CheckList[]> = {};
+      checkLists.forEach(value => (mapping[value.task] || (mapping[value.task] = [])).push(value));
+      state.checkLists = mapping;
+    },
+    addCheckList(state, value: CheckList) {
+      const checkLists = state.checkLists[value.task] || (state.checkLists[value.task] = []);
+
+      if (checkLists.find(other => other.id === value.id)) {
+        console.warn("Do not add duplicate checklist")
+        return;
+      }
+      checkLists.push(value);
+    },
+    updateCheckList(state, value: CheckList) {
+      const checklists = state.checkLists[value.task];
+
+      let found;
+
+      if (checklists) {
+        found = checklists.find(other => other.id === value.id);
+      }
+
+      if (found) {
+        Object.assign(found, value);
+      } else {
+        console.warn("Cannot update checklist, does not exist in store");
+      }
+    },
+    removeCheckList(state, value: CheckList) {
+      const checklists = state.checkLists[value.task];
+
+      if (checklists) {
+        removeEntity(checklists, value.id);
+      }
+    },
+    addCheckItem(state, value: CheckItem) {
+      const list = findCheckList(state.checkLists, value.id);
+
+      if (list) {
+        list.items.push({ ...value });
+      }
+    },
+    updateCheckItem(state, value: CheckItem) {
+      const list = findCheckList(state.checkLists, value.id);
+
+      if (list) {
+        const index = list.items.findIndex(item => item.id === value.id);
+
+        if (index < 0) {
+          console.error("Cannot update CheckItem, does not exist in store");
+        } else {
+          Object.assign(list.items[index], value);
+        }
+      }
+    },
+    removeCheckItem(state, value: CheckItem) {
+      const list = findCheckList(state.checkLists, value.id);
+
+      if (list) {
+        removeEntity(list.items, value.id);
+      }
     }
   },
   actions: {
@@ -264,6 +341,43 @@ export default createStore({
     async deleteTask({ commit }, taskId: number): Promise<void> {
       await HttpClient.deleteApiTasksbyId(taskId);
       commit("removeTask", taskId);
+    },
+    async addCheckList({ commit }, checkList: Create<CheckList>): Promise<CheckList> {
+      const createdList = await HttpClient.postApiCheckLists(checkList);
+      checkList.id = createdList.id;
+
+      checkList.items = await Promise.all(
+        checkList.items.map(checkItem => {
+          checkItem.list = checkList.id as number;
+          return HttpClient.postApiCheckItems(checkItem);
+        })
+      )
+
+      commit("addCheckList", checkList);
+      return checkList as CheckList;
+    },
+    async updateCheckList({ commit }, checkList: CheckList): Promise<CheckList> {
+      await HttpClient.putApiCheckListsbyId(checkList);
+      commit("updateCheckList", checkList);
+      return checkList;
+    },
+    async deleteCheckList({ commit }, checkList: CheckList): Promise<void> {
+      await HttpClient.deleteApiCheckListsbyId(checkList.id);
+      commit("removeCheckList", checkList);
+    },
+    async addCheckItem({ commit }, checkItem: Create<CheckItem>): Promise<CheckItem> {
+      checkItem = await HttpClient.postApiCheckItems(checkItem);
+      commit("addCheckItem", checkItem);
+      return checkItem as CheckItem;
+    },
+    async updateCheckItem({ commit }, checkItem: CheckItem): Promise<CheckItem> {
+      await HttpClient.putApiCheckItemsbyId(checkItem);
+      commit("updateCheckItem", checkItem);
+      return checkItem;
+    },
+    async deleteCheckItem({ commit }, checkItem: CheckItem): Promise<void> {
+      await HttpClient.deleteApiCheckItemsbyId(checkItem.id);
+      commit("removeCheckItem", checkItem);
     },
     async updateBoardTasks({ commit }, payload: { items: Task[], boardId: number }) {
       const toChangeItems = await Promise.all(payload.items.filter(value => value.board !== payload.boardId).map(task => {
@@ -371,6 +485,10 @@ export default createStore({
       const reminders = await sync(HttpClient.getApiReminders(), Object.values(state.reminders).flat(), value => HttpClient.postApiReminders(value));
       reminders.forEach(reminder => notifyReminder(getters, reminder, state, commit, dispatch));
       commit("setReminders", reminders);
+
+      // TODO: add newly added checkitems
+      const checkLists = await sync(HttpClient.getApiCheckLists(), Object.values(state.checkLists).flat(), value => HttpClient.postApiCheckLists(value));
+      commit("setCheckLists", checkLists);
     }
   },
   modules: {}

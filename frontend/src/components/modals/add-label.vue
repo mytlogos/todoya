@@ -12,7 +12,7 @@
         <template v-slot:body>
             <input
                 id="label-name"
-                class="custom-control"
+                class="form-control"
                 v-model="name"
                 type="text"
                 @keyup.enter="submitted"

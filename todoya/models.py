@@ -36,6 +36,17 @@ class Task(models.Model):
     labels = models.ManyToManyField(Label, blank=True)
 
 
+class CheckList(models.Model):
+    title = models.TextField()
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+
+
+class CheckItem(models.Model):
+    title = models.TextField()
+    checked = models.BooleanField()
+    list = models.ForeignKey(CheckList, related_name="items", on_delete=models.CASCADE)
+
+
 class Reminder(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     when = models.DateTimeField()

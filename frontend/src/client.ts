@@ -153,6 +153,54 @@ const api = {
             path: "api/labels/{id}/"
         },
     },
+    "api_checkLists_": {
+        get: {
+            method: Methods.get,
+            path: "api/checkLists/"
+        },
+        post: {
+            method: Methods.post,
+            path: "api/checkLists/"
+        },
+    },
+    "api_checkLists_{id}_": {
+        delete: {
+            method: Methods.delete,
+            path: "api/checkLists/{id}/"
+        },
+        get: {
+            method: Methods.get,
+            path: "api/checkLists/{id}/"
+        },
+        put: {
+            method: Methods.put,
+            path: "api/checkLists/{id}/"
+        },
+    },
+    "api_checkItems_": {
+        get: {
+            method: Methods.get,
+            path: "api/checkItems/"
+        },
+        post: {
+            method: Methods.post,
+            path: "api/checkItems/"
+        },
+    },
+    "api_checkItems_{id}_": {
+        delete: {
+            method: Methods.delete,
+            path: "api/checkItems/{id}/"
+        },
+        get: {
+            method: Methods.get,
+            path: "api/checkItems/{id}/"
+        },
+        put: {
+            method: Methods.put,
+            path: "api/checkItems/{id}/"
+        },
+    },
 };
 
 export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
@@ -181,6 +229,18 @@ export interface Label extends Entity {
 export interface Reminder extends Entity {
     task: number
     when: Date
+}
+
+export interface CheckList extends Entity {
+    task: number;
+    title: string;
+    items: CheckItem[];
+}
+
+export interface CheckItem extends Entity {
+    title: string;
+    checked: boolean;
+    list: number;
 }
 
 export interface Task extends Entity {
@@ -348,6 +408,46 @@ export const HttpClient = {
 
     putApiLabelsbyId(value: Label): Promise<unknown> {
         return this.queryServer(api["api_labels_{id}_"].put, value);
+    },
+
+    getApiCheckItems(): Promise<CheckItem[]> {
+        return this.queryServer(api.api_checkItems_.get);
+    },
+
+    postApiCheckItems(value: Create<CheckItem>): Promise<CheckItem> {
+        return this.queryServer(api.api_checkItems_.post, value);
+    },
+
+    deleteApiCheckItemsbyId(id: number): Promise<void> {
+        return this.queryServer(api["api_checkItems_{id}_"].delete, { id });
+    },
+
+    getApiCheckItemsbyId(id: number): Promise<CheckItem> {
+        return this.queryServer(api["api_checkItems_{id}_"].get, { id });
+    },
+
+    putApiCheckItemsbyId(value: CheckItem): Promise<CheckItem> {
+        return this.queryServer(api["api_checkItems_{id}_"].put, value);
+    },
+
+    getApiCheckLists(): Promise<CheckList[]> {
+        return this.queryServer(api.api_checkLists_.get);
+    },
+
+    postApiCheckLists(value: Create<CheckList>): Promise<CheckList> {
+        return this.queryServer(api.api_checkLists_.post, value);
+    },
+
+    deleteApiCheckListsbyId(id: number): Promise<void> {
+        return this.queryServer(api["api_checkLists_{id}_"].delete, { id });
+    },
+
+    getApiCheckListsbyId(id: number): Promise<CheckList> {
+        return this.queryServer(api["api_checkLists_{id}_"].get, { id });
+    },
+
+    putApiCheckListsbyId(value: CheckList): Promise<CheckItem> {
+        return this.queryServer(api["api_checkLists_{id}_"].put, value);
     },
 
     async queryServer({ path, method }: { path: string; method?: string }, query?: any): Promise<any> {

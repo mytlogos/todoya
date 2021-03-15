@@ -65,66 +65,95 @@
                     >
                 </div>
             </div>
-            <select v-model="project" class="custom-select">
-                <option selected>Select Project of Task</option>
-                <option
-                    v-for="project in $store.state.projects"
-                    :key="project.id"
-                    :value="project.id"
-                    >{{ project.title }}</option
-                >
-            </select>
-            <select v-model="board" class="custom-select">
-                <option selected>Select Initial Board of Task</option>
-                <option
-                    v-for="board in boards"
-                    :key="board.id"
-                    :value="board.id"
-                    >{{ board.title }}</option
-                >
-            </select>
-            <input
-                class="custom-control"
-                v-model="location"
-                type="text"
-                placeholder="Location"
-            />
-            <select v-model="parentTask" class="custom-select">
-                <option selected>Select optional Parent Task</option>
-                <option
-                    v-for="task in possibleTaskParents"
-                    :key="task.id"
-                    :value="task.id"
-                    >{{ task.title }}</option
-                >
-            </select>
-            <div class="form-row mx-0">
-                <input
-                    class="custom-control"
-                    v-model="startDate"
-                    type="date"
-                /><input
-                    class="custom-control"
-                    v-model="startTime"
-                    type="time"
-                />
+            <div class="form-row">
+                <div class="col">
+                    <select
+                        v-model="project"
+                        class="custom-select form-control w-100"
+                    >
+                        <option selected>Select Project</option>
+                        <option
+                            v-for="project in $store.state.projects"
+                            :key="project.id"
+                            :value="project.id"
+                            >{{ project.title }}</option
+                        >
+                    </select>
+                </div>
+                <div class="col">
+                    <select
+                        v-model="board"
+                        class="custom-select form-control w-100"
+                    >
+                        <option selected>Select Board</option>
+                        <option
+                            v-for="board in boards"
+                            :key="board.id"
+                            :value="board.id"
+                            >{{ board.title }}</option
+                        >
+                    </select>
+                </div>
             </div>
-            <div class="form-row mx-0 my-2">
-                <input
-                    class="custom-control"
-                    v-model="dueDate"
-                    type="date"
-                /><input class="custom-control" v-model="dueTime" type="time" />
+            <div class="form-row">
+                <div class="col">
+                    <select v-model="parentTask" class="custom-select">
+                        <option selected>Select optional Parent Task</option>
+                        <option
+                            v-for="task in possibleTaskParents"
+                            :key="task.id"
+                            :value="task.id"
+                            >{{ task.title }}</option
+                        >
+                    </select>
+                </div>
+                <div class="col">
+                    <input
+                        class="form-control"
+                        v-model="location"
+                        type="text"
+                        placeholder="Location"
+                    />
+                </div>
             </div>
-            <div class="form-row form-inline mx-0 my-2">
-                <label style="margin-right: 0.5em;">Remind me:</label>
+            <div class="form-row">
+                <span class="my-auto col-form-label col-sm-1">Start</span>
+                <div class="col">
+                    <input
+                        class="form-control"
+                        v-model="startDate"
+                        type="date"
+                    />
+                </div>
+                <div class="col">
+                    <input
+                        class="form-control"
+                        v-model="startTime"
+                        type="time"
+                    />
+                </div>
+            </div>
+            <div class="form-row">
+                <span class="my-auto col-form-label col-sm-1">Due</span>
+                <div class="col">
+                    <input class="form-control" v-model="dueDate" type="date" />
+                </div>
+                <div class="col">
+                    <input class="form-control" v-model="dueTime" type="time" />
+                </div>
+            </div>
+            <div class="form-row form-inline">
+                <span class="my-auto col-form-label">Remind me:</span>
                 <input
-                    class="custom-control"
+                    class="form-control mx-2"
                     style="width: 5em;"
                     v-model.number="reminderValue"
                     type="number"
                 />
-                <select v-model="reminderUnit" class="custom-select">
+                <select
+                    v-model="reminderUnit"
+                    class="custom-select form-control flex-fill"
+                >
                     <option
                         v-for="reminder in possibleReminder"
                         :key="reminder.value"
@@ -135,7 +164,7 @@
             </div>
             <textarea
                 v-model="description"
-                class="custom-control w-100"
+                class="form-control w-100"
                 placeholder="Description"
                 rows="5"
             />
@@ -341,6 +370,7 @@ export default defineComponent({
 
                 this.name = "";
                 this.description = "";
+                this.labels = [];
 
                 this.$emit("finish");
             } finally {
@@ -353,4 +383,14 @@ export default defineComponent({
 </script>
 
 <style>
+#add-task-modal .modal-body > .custom-control,
+#add-task-modal .modal-body > .form-row,
+#add-task-modal .modal-body > .form-control {
+    margin-top: 0.25rem !important;
+    margin-bottom: 0.25rem !important;
+}
+#add-task-modal .modal-body span.my-auto {
+    padding-left: 5px;
+    padding-right: 5px;
+}
 </style>

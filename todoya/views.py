@@ -54,3 +54,21 @@ class ReminderViewSet(viewsets.ModelViewSet):
 
     queryset = models.Reminder.objects.all()
     serializer_class = serializers.ReminderSerializer
+
+
+class CheckItemViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+
+    queryset = models.CheckItem.objects.all()
+    serializer_class = serializers.CheckItemSerializer
+
+
+class CheckListViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+
+    queryset = models.CheckList.objects.all()
+    serializer_class = serializers.CheckListSerializer

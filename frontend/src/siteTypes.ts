@@ -1,4 +1,4 @@
-import { Board, Category, Label, Project, Reminder, Task } from "./client";
+import { Board, Category, CheckList, Label, Project, Reminder, Task } from "./client";
 
 export interface ConfirmationModal {
     title: string;
@@ -26,4 +26,5 @@ export interface VuexStore {
     editTask: null | number;
     confirmationModal: null | ConfirmationModal;
     addTaskModal: null | AddTaskModal | boolean;
+    checkLists: Record<number, CheckList[]>;
 }

@@ -10,93 +10,120 @@
             Edit Task
         </template>
         <template v-slot:body>
-            <input
-                id="task-name"
-                class="form-control"
-                v-model="name"
-                type="text"
-                placeholder="Name"
-            />
-            <div>
-                <div class="dropdown d-inline-block">
-                    <button
-                        class="btn btn-secondary dropdown-toggle"
-                        type="button"
-                        id="dropdownPushTaskLabelMenu"
-                        data-toggle="dropdown"
-                        aria-expanded="false"
-                    >
-                        Label
-                    </button>
-                    <ul
-                        class="dropdown-menu"
-                        aria-labelledby="dropdownPushTaskLabelMenu"
-                    >
-                        <li v-for="label in $store.state.labels" :key="label">
-                            <a
-                                class="dropdown-item"
-                                href="#"
-                                @click="addLabel(label)"
+            <div class="row">
+                <div class="col-sm">
+                    <input
+                        id="task-name"
+                        class="form-control"
+                        v-model="name"
+                        type="text"
+                        placeholder="Name"
+                    />
+                    <div class="form-row">
+                        <div class="col-sm">
+                            <select
+                                v-model="project"
+                                class="custom-select form-control w-100"
                             >
-                                <span
-                                    class="badge"
-                                    :style="`background-color: ${label.color};`"
+                                <option selected>Select Project</option>
+                                <option
+                                    v-for="project in $store.state.projects"
+                                    :key="project.id"
+                                    :value="project.id"
+                                    >{{ project.title }}</option
                                 >
-                                    {{ label.title }}
-                                </span>
-                            </a>
-                        </li>
-                    </ul>
+                            </select>
+                        </div>
+                        <div class="col-sm">
+                            <select
+                                v-model="board"
+                                class="custom-select form-control w-100"
+                            >
+                                <option selected>Select Board</option>
+                                <option
+                                    v-for="board in boards"
+                                    :key="board.id"
+                                    :value="board.id"
+                                    >{{ board.title }}</option
+                                >
+                            </select>
+                        </div>
+                    </div>
+                    <textarea
+                        v-model="description"
+                        class="form-control w-100"
+                        placeholder="Description"
+                        rows="5"
+                    />
+                    <check-list
+                        v-for="(checklist, index) in checkLists"
+                        :key="checklist.title"
+                        v-model="checklist.items"
+                        v-model:title="checklist.title"
+                        :checkListId="checklist.id"
+                        @delete="deleteCheckList(index)"
+                    />
                 </div>
-                <i
-                    class="btn fas fa-plus bg-danger text-white"
-                    style="font-size: 1.5em; margin-left: 0.2em"
-                    @click="showAddLabel = true"
-                />
-                <div class="label-container">
-                    <span
-                        v-for="label in labels"
-                        :key="label"
-                        :style="
-                            `background-color: ${label.color}; font-size: 100%;`
-                        "
-                        class="badge"
-                        >{{ label.title }}</span
+                <div class="col-sm-3">
+                    <div class="form-row mx-auto btn-group w-100">
+                        <div class="dropdown d-inline-block flex-fill">
+                            <button
+                                class="btn btn-secondary dropdown-toggle w-100"
+                                type="button"
+                                id="dropdownPushTaskLabelMenu"
+                                data-toggle="dropdown"
+                                aria-expanded="false"
+                            >
+                                Label
+                            </button>
+                            <ul
+                                class="dropdown-menu"
+                                aria-labelledby="dropdownPushTaskLabelMenu"
+                            >
+                                <li
+                                    v-for="label in $store.state.labels"
+                                    :key="label"
+                                >
+                                    <a
+                                        class="dropdown-item"
+                                        href="#"
+                                        @click="addLabel(label)"
+                                    >
+                                        <span
+                                            class="badge"
+                                            :style="
+                                                `background-color: ${label.color};`
+                                            "
+                                        >
+                                            {{ label.title }}
+                                        </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <i
+                            class="btn fas fa-plus bg-secondary text-white"
+                            @click="showAddLabel = true"
+                        />
+                        <div class="label-container">
+                            <span
+                                v-for="label in labels"
+                                :key="label"
+                                :style="
+                                    `background-color: ${label.color}; font-size: 100%;`
+                                "
+                                class="badge"
+                                >{{ label.title }}</span
+                            >
+                        </div>
+                    </div>
+                    <button
+                        @click="addCheckList"
+                        class="btn btn-secondary form-control d-flex"
                     >
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="col">
-                    <select
-                        v-model="project"
-                        class="custom-select form-control w-100"
-                    >
-                        <option selected>Select Project</option>
-                        <option
-                            v-for="project in $store.state.projects"
-                            :key="project.id"
-                            :value="project.id"
-                            >{{ project.title }}</option
-                        >
-                    </select>
-                </div>
-                <div class="col">
-                    <select
-                        v-model="board"
-                        class="custom-select form-control w-100"
-                    >
-                        <option selected>Select Board</option>
-                        <option
-                            v-for="board in boards"
-                            :key="board.id"
-                            :value="board.id"
-                            >{{ board.title }}</option
-                        >
-                    </select>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="col">
+                        <i class="fas fa-plus my-auto mr-2"></i
+                        ><span>Checklist</span>
+                    </button>
                     <select v-model="parentTask" class="custom-select">
                         <option selected>Select optional Parent Task</option>
                         <option
@@ -106,68 +133,70 @@
                             >{{ task.title }}</option
                         >
                     </select>
-                </div>
-                <div class="col">
                     <input
                         class="form-control"
                         v-model="location"
                         type="text"
                         placeholder="Location"
                     />
+                    <div class="form-row">
+                        <span class="my-auto col-form-label col-sm-1"
+                            >Start</span
+                        >
+                        <div class="col-sm">
+                            <input
+                                class="form-control"
+                                v-model="startDate"
+                                type="date"
+                            />
+                        </div>
+                        <div class="col-sm">
+                            <input
+                                class="form-control"
+                                v-model="startTime"
+                                type="time"
+                            />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <span class="my-auto col-form-label col-sm-1">Due</span>
+                        <div class="col-sm">
+                            <input
+                                class="form-control"
+                                v-model="dueDate"
+                                type="date"
+                            />
+                        </div>
+                        <div class="col-sm">
+                            <input
+                                class="form-control"
+                                v-model="dueTime"
+                                type="time"
+                            />
+                        </div>
+                    </div>
+                    <div class="form-row form-inline">
+                        <span class="my-auto col-form-label">Remind me:</span>
+                        <input
+                            class="form-control col-sm"
+                            style="width: 5em;"
+                            v-model.number="reminderValue"
+                            type="number"
+                        />
+                        <select
+                            v-model="reminderUnit"
+                            class="custom-select form-control col-sm"
+                        >
+                            <option
+                                v-for="reminder in possibleReminder"
+                                :key="reminder.value"
+                                :value="reminder.value"
+                                >{{ reminder.name }}</option
+                            >
+                        </select>
+                    </div>
                 </div>
             </div>
-            <div class="form-row">
-                <span class="my-auto col-form-label col-sm-1">Start</span>
-                <div class="col">
-                    <input
-                        class="form-control"
-                        v-model="startDate"
-                        type="date"
-                    />
-                </div>
-                <div class="col">
-                    <input
-                        class="form-control"
-                        v-model="startTime"
-                        type="time"
-                    />
-                </div>
-            </div>
-            <div class="form-row">
-                <span class="my-auto col-form-label col-sm-1">Due</span>
-                <div class="col">
-                    <input class="form-control" v-model="dueDate" type="date" />
-                </div>
-                <div class="col">
-                    <input class="form-control" v-model="dueTime" type="time" />
-                </div>
-            </div>
-            <div class="form-row form-inline">
-                <span class="my-auto col-form-label">Remind me:</span>
-                <input
-                    class="form-control mx-2"
-                    style="width: 5em;"
-                    v-model.number="reminderValue"
-                    type="number"
-                />
-                <select
-                    v-model="reminderUnit"
-                    class="custom-select form-control flex-fill"
-                >
-                    <option
-                        v-for="reminder in possibleReminder"
-                        :key="reminder.value"
-                        :value="reminder.value"
-                        >{{ reminder.name }}</option
-                    >
-                </select>
-            </div>
-            <textarea
-                v-model="description"
-                class="form-control w-100"
-                placeholder="Description"
-                rows="5"
-            />
         </template>
     </modal>
     <teleport to="body">
@@ -180,11 +209,12 @@
 </template>
 
 <script lang="ts">
-import { Board, Label, Task } from "@/client";
+import { Board, CheckItem, CheckList, Label, Task } from "@/client";
 import { defineComponent } from "vue";
 import modal from "./modal.vue";
 import $ from "jquery";
 import AddLabel from "./add-label.vue";
+import checkList from "../check-list.vue";
 
 enum TimeUnit {
     SECOND = 1,
@@ -196,6 +226,17 @@ enum TimeUnit {
     YEAR = DAY * 365
 }
 
+function getCheckLists(getter: any, taskId?: number): CheckList[] {
+    if (!taskId) {
+        return [];
+    }
+    // make a deep copy to avoid store pollution
+    return getter.getCheckLists(taskId).map((value: CheckList) => ({
+        ...value,
+        items: value.items.map(item => ({ ...item }))
+    }));
+}
+
 export default defineComponent({
     name: "EditTaskModal",
     props: {
@@ -203,11 +244,12 @@ export default defineComponent({
         taskId: Number
     },
     emits: ["finish", "close"],
-    components: { modal, AddLabel },
+    components: { modal, AddLabel, checkList },
     data() {
         const task: Task | undefined = this.$store.getters.getTask(this.taskId);
 
         return {
+            checkLists: getCheckLists(this.$store.getters, this.taskId),
             showAddLabel: false,
             submitting: false,
             name: task?.title || "",
@@ -244,6 +286,9 @@ export default defineComponent({
         };
     },
     computed: {
+        storeCheckLists(): CheckList[] {
+            return getCheckLists(this.$store.getters, this.taskId);
+        },
         boards(): Board[] {
             return this.$store.getters.getBoards(this.project);
         },
@@ -260,6 +305,14 @@ export default defineComponent({
         );
     },
     watch: {
+        storeCheckLists() {
+            // ensure that the checklists from the store do exist in edit-task
+            this.storeCheckLists.forEach(value => {
+                if (!this.checkLists.find(current => current.id === value.id)) {
+                    this.checkLists.push(value);
+                }
+            });
+        },
         task(task) {
             this.name = task?.title || "";
             this.project = task?.project;
@@ -267,6 +320,7 @@ export default defineComponent({
             this.location = task?.location || "";
             this.description = task?.description || "";
             this.parentTask = task?.parent_task as null | Task;
+            this.checkLists = getCheckLists(this.$store.getters, this.taskId);
         },
         startDate() {
             // automatically set time to 0:00 if not set yet
@@ -282,6 +336,18 @@ export default defineComponent({
         }
     },
     methods: {
+        addCheckList() {
+            this.checkLists.push({
+                id: 0,
+                title: "CheckList",
+                task: this.taskId as number,
+                items: []
+            });
+            // TODO: create a task after creating a checklist
+        },
+        deleteCheckList(index: number) {
+            this.checkLists.splice(index, 1);
+        },
         addLabel(label: Label) {
             if (!this.labels.includes(label)) {
                 this.labels.push(label);
@@ -321,6 +387,8 @@ export default defineComponent({
                     labels: this.labels.map(value => value.id)
                 } as Task);
 
+                await this.submitCheckLists();
+
                 // TODO: update reminder
                 // if (
                 //     this.reminderValue &&
@@ -344,26 +412,131 @@ export default defineComponent({
 
                 this.name = "";
                 this.description = "";
+                this.labels = [];
+                this.checkLists = [];
 
                 this.$emit("finish");
                 this.$emit("close");
             } finally {
                 this.submitting = false;
             }
+        },
+        async submitCheckLists() {
+            const originalCheckLists = this.$store.getters.getCheckLists(
+                this.taskId
+            ) as CheckList[];
+
+            const newCheckItems = [] as CheckItem[];
+            const updatedCheckItems = [] as CheckItem[];
+            const removedCheckItems = [] as CheckItem[];
+
+            this.checkLists
+                .filter(value => value.id)
+                .forEach(checkList => {
+                    const original = originalCheckLists.find(
+                        value => value.id === checkList.id
+                    );
+
+                    if (!original) {
+                        console.warn(
+                            "Expected to find the checklist in the original: " +
+                                JSON.stringify(checkList)
+                        );
+                        return;
+                    }
+
+                    newCheckItems.push(
+                        ...checkList.items.filter(value => value.id === 0)
+                    );
+
+                    original.items.forEach(originalItem => {
+                        const value = checkList.items.find(
+                            current => current.id === originalItem.id
+                        );
+
+                        if (!value) {
+                            removedCheckItems.push(originalItem);
+                        } else if (
+                            value.title !== originalItem.title ||
+                            value.checked !== originalItem.checked
+                        ) {
+                            updatedCheckItems.push(value);
+                        }
+                    });
+                });
+
+            // create, update, delete check items from existing checklists
+            await Promise.all([
+                ...newCheckItems.map(value =>
+                    this.$store.dispatch("addCheckItem", value)
+                ),
+                ...updatedCheckItems.map(value =>
+                    this.$store.dispatch("updateCheckItem", value)
+                ),
+                ...removedCheckItems.map(value =>
+                    this.$store.dispatch("deleteCheckItem", value)
+                )
+            ]);
+
+            const newLists = this.checkLists.filter(value => value.id === 0);
+            const removedLists = [] as CheckList[];
+            const updatedLists = [] as CheckList[];
+
+            originalCheckLists.forEach(original => {
+                const value = this.checkLists.find(
+                    current => current.id === original.id
+                );
+                if (!value) {
+                    removedLists.push(original);
+                } else if (value.title !== original.title) {
+                    updatedLists.push(value);
+                }
+            });
+            // create, update, delete check lists
+            await Promise.all([
+                ...newLists.map(value =>
+                    this.$store.dispatch("addCheckList", value)
+                ),
+                ...updatedLists.map(value =>
+                    this.$store.dispatch("updateCheckList", value)
+                ),
+                ...removedLists.map(value =>
+                    this.$store.dispatch("deleteCheckList", value)
+                )
+            ]);
         }
     }
 });
 </script>
 
 <style>
-#edit-task-modal .modal-body > .custom-control,
-#edit-task-modal .modal-body > .form-row,
-#edit-task-modal .modal-body > .form-control {
+#edit-task-modal .modal-body .custom-control,
+#edit-task-modal .modal-body .form-row,
+#edit-task-modal .modal-body .form-control {
     margin-top: 0.25rem !important;
     margin-bottom: 0.25rem !important;
 }
 #edit-task-modal .modal-body span.my-auto {
     padding-left: 5px;
     padding-right: 5px;
+}
+#edit-task-modal .modal-body .form-control[type="date"],
+#edit-task-modal .modal-body .form-control[type="time"] {
+    min-width: 150px;
+}
+#edit-task-modal .modal-body .btn-group .dropdown:first-child .btn {
+    border-radius: 0.25rem 0 0 0.25rem;
+}
+#edit-task-modal .modal-body .btn-group .dropdown ~ .btn {
+    max-width: 40px;
+    border-radius: 0 0.25rem 0.25rem 0;
+    align-content: center;
+    display: grid;
+    border-left: 1px #acacac solid;
+}
+@media (min-width: 750px) {
+    #edit-task-modal > .modal-dialog {
+        max-width: 700px;
+    }
 }
 </style>
