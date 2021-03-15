@@ -7,7 +7,7 @@
         @keyup.enter.ctrl="submitted"
     >
         <template v-slot:title>
-            Add Task
+            Edit Task
         </template>
         <template v-slot:body>
             <input
