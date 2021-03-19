@@ -12,13 +12,46 @@
         <template v-slot:body>
             <div class="row">
                 <div class="col-sm">
-                    <input
-                        id="task-name"
-                        class="form-control"
-                        v-model="name"
-                        type="text"
-                        placeholder="Name"
-                    />
+                    <div class="form-row mx-0">
+                        <input
+                            id="task-name"
+                            class="form-control col-sm"
+                            v-model="name"
+                            type="text"
+                            placeholder="Name"
+                        />
+                        <div class="dropdown">
+                            <a
+                                class="btn col-auto my-1 btn-default"
+                                title="Priority"
+                                role="button"
+                                id="editPriorityButton"
+                                data-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false"
+                            >
+                                <priority
+                                    :priority="priority"
+                                    :displayText="true"
+                                />
+                            </a>
+                            <div
+                                class="dropdown-menu"
+                                aria-labelledby="editPriorityButton"
+                            >
+                                <a
+                                    v-for="item in priorityList"
+                                    :key="item.id"
+                                    class="dropdown-item"
+                                    href="#"
+                                    @click="priorityId = item.id"
+                                    ><priority
+                                        :priority="item"
+                                        :displayText="true"
+                                /></a>
+                            </div>
+                        </div>
+                    </div>
                     <div class="form-row">
                         <div class="col-sm">
                             <select
@@ -209,12 +242,13 @@
 </template>
 
 <script lang="ts">
-import { Board, CheckItem, CheckList, Label, Task } from "@/client";
+import { Board, CheckItem, CheckList, Label, Priority, Task } from "@/client";
 import { defineComponent } from "vue";
 import modal from "./modal.vue";
 import $ from "jquery";
 import AddLabel from "./add-label.vue";
 import checkList from "../check-list.vue";
+import priority from "../priority.vue";
 
 enum TimeUnit {
     SECOND = 1,
@@ -244,11 +278,12 @@ export default defineComponent({
         taskId: Number
     },
     emits: ["finish", "close"],
-    components: { modal, AddLabel, checkList },
+    components: { modal, AddLabel, checkList, priority },
     data() {
         const task: Task | undefined = this.$store.getters.getTask(this.taskId);
 
         return {
+            priorityId: task?.priority || 3,
             checkLists: getCheckLists(this.$store.getters, this.taskId),
             showAddLabel: false,
             submitting: false,
@@ -286,6 +321,14 @@ export default defineComponent({
         };
     },
     computed: {
+        priority(): Priority {
+            return this.$store.getters.getPriorities(this.task?.project).find(
+                (value: Priority) => value.id === this.priorityId
+            ) as Priority;
+        },
+        priorityList(): Priority[] {
+            return this.$store.getters.getPriorities(this.task?.project);
+        },
         storeCheckLists(): CheckList[] {
             return getCheckLists(this.$store.getters, this.taskId);
         },
@@ -321,6 +364,7 @@ export default defineComponent({
             this.description = task?.description || "";
             this.parentTask = task?.parent_task as null | Task;
             this.checkLists = getCheckLists(this.$store.getters, this.taskId);
+            this.priorityId = task?.priority || 3;
         },
         startDate() {
             // automatically set time to 0:00 if not set yet
@@ -384,7 +428,8 @@ export default defineComponent({
                     location: this.location,
                     parent_task: this.parentTask?.id,
                     categories: [],
-                    labels: this.labels.map(value => value.id)
+                    labels: this.labels.map(value => value.id),
+                    priority: this.priorityId
                 } as Task);
 
                 await this.submitCheckLists();
@@ -510,6 +555,10 @@ export default defineComponent({
 </script>
 
 <style>
+#edit-task-modal .modal-body .btn-default {
+    border-color: #ced4da;
+    margin-left: 10px;
+}
 #edit-task-modal .modal-body .custom-control,
 #edit-task-modal .modal-body .form-row,
 #edit-task-modal .modal-body .form-control {

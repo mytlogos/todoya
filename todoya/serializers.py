@@ -1,4 +1,15 @@
-from .models import Board, CheckItem, CheckList, Label, Reminder, Task, Category, Project
+from .models import (
+    Board,
+    CheckItem,
+    CheckList,
+    Label,
+    Priority,
+    PriorityList,
+    Reminder,
+    Task,
+    Category,
+    Project,
+)
 from rest_framework import serializers
 
 
@@ -37,10 +48,12 @@ class ReminderSerializer(serializers.ModelSerializer):
         model = Reminder
         fields = "__all__"
 
+
 class CheckItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = CheckItem
         fields = ["id", "title", "checked", "list"]
+
 
 class CheckListSerializer(serializers.ModelSerializer):
     items = CheckItemSerializer(many=True, read_only=True)
@@ -48,3 +61,17 @@ class CheckListSerializer(serializers.ModelSerializer):
     class Meta:
         model = CheckList
         fields = ["id", "title", "items", "task"]
+
+
+class PrioritySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Priority
+        fields = "__all__"
+
+
+class PriorityListSerializer(serializers.ModelSerializer):
+    items = PrioritySerializer(many=True, read_only=True)
+
+    class Meta:
+        model = PriorityList
+        fields = ["id", "title", "items", "project", "default"]

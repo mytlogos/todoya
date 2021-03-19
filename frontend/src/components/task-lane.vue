@@ -40,7 +40,7 @@
         <div class="card-body">
             <vue-draggable v-model="items" , item-key="id" group="tasklane">
                 <template #item="{element}">
-                    <board-item :item="element" />
+                    <board-item :item="element" :priorityList="priorityList" />
                 </template>
             </vue-draggable>
         </div>
@@ -51,7 +51,7 @@
 </template>
 
 <script lang="ts">
-import { Board, Task } from "@/client";
+import { Board, Priority, Task } from "@/client";
 import { defineComponent, PropType } from "vue";
 import BoardItem from "./BoardItem.vue";
 import VueDraggable from "vuedraggable";
@@ -86,6 +86,9 @@ export default defineComponent({
                     boardId: this.board.id
                 });
             }
+        },
+        priorityList(): Priority[] {
+            return this.$store.getters.getPriorities(this.board.project);
         },
         itemCount(): string {
             if (!this.items) return "";

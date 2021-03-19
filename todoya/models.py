@@ -21,6 +21,18 @@ class Label(models.Model):
     color = models.TextField()
 
 
+class Priority(models.Model):
+    title = models.TextField()
+    value = models.IntegerField()
+
+
+class PriorityList(models.Model):
+    title = models.TextField()
+    items = models.ManyToManyField(Priority)
+    project = models.OneToOneField(Project, on_delete=models.CASCADE)
+    default = models.ForeignKey(Priority, related_name="+", on_delete=models.RESTRICT)
+
+
 class Task(models.Model):
     title = models.TextField()
     start = models.DateTimeField(null=True)
@@ -34,6 +46,7 @@ class Task(models.Model):
     parent_task = models.ForeignKey("Task", null=True, on_delete=models.CASCADE)
     categories = models.ManyToManyField(Category, blank=True)
     labels = models.ManyToManyField(Label, blank=True)
+    priority = models.ForeignKey(Priority, on_delete=models.RESTRICT)
 
 
 class CheckList(models.Model):

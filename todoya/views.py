@@ -72,3 +72,21 @@ class CheckListViewSet(viewsets.ModelViewSet):
 
     queryset = models.CheckList.objects.all()
     serializer_class = serializers.CheckListSerializer
+
+
+class PriorityViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+
+    queryset = models.Priority.objects.all()
+    serializer_class = serializers.PrioritySerializer
+
+
+class PriorityListViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+
+    queryset = models.PriorityList.objects.all()
+    serializer_class = serializers.PriorityListSerializer

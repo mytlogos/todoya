@@ -1,4 +1,4 @@
-import { Board, Category, CheckList, CheckItem, Create, Entity, HttpClient, Label, Project, Reminder, reyhydrateDate, Task } from "@/client";
+import { Board, Category, CheckList, CheckItem, Create, Entity, HttpClient, Label, Project, Reminder, reyhydrateDate, Task, Priority, PriorityList } from "@/client";
 import { VuexStore } from "@/siteTypes";
 import { Commit, createLogger, createStore, Dispatch } from "vuex";
 import persistedState from "vuex-persistedstate";
@@ -108,6 +108,7 @@ export default createStore({
     confirmationModal: null,
     addTaskModal: null,
     checkLists: {},
+    priorityLists: {},
   }),
   getters: {
     getBoards: (state) => (projectId: number): Board[] => {
@@ -135,6 +136,9 @@ export default createStore({
     getCheckLists: (state) => (id: number): undefined | CheckList[] => {
       return state.checkLists[id] || [];
     },
+    getPriorities: (state) => (projectId: number): Priority[] => {
+      return state.priorityLists[projectId]?.items || [];
+    }
   },
   mutations: {
     setProjects(state, projects: Project[]) {
@@ -251,6 +255,26 @@ export default createStore({
     },
     setAddTaskModal(state, value: any) {
       state.addTaskModal = value;
+    },
+    setPriorityLists(state, priorityLists: PriorityList[]) {
+      const mapping: Record<number, PriorityList> = {};
+      priorityLists.forEach(value => mapping[value.project] = value);
+      state.priorityLists = mapping;
+    },
+    addPriorityList(state, value: PriorityList) {
+      state.priorityLists[value.project] = value;
+    },
+    updatePriorityList(state, value: PriorityList) {
+      const found = state.priorityLists[value.project]
+
+      if (found) {
+        Object.assign(found, value);
+      } else {
+        console.warn("Cannot update prioritylist, does not exist in store");
+      }
+    },
+    removePriorityList(state, value: PriorityList) {
+      delete state.priorityLists[value.project];
     },
     setCheckLists(state, checkLists: CheckList[]) {
       const mapping: Record<number, CheckList[]> = {};
@@ -397,6 +421,17 @@ export default createStore({
       commit("addProject", project);
       return project as Project;
     },
+    async addPriorityList({ commit, state }, priorityList: Create<PriorityList>): Promise<PriorityList> {
+      try {
+        priorityList = await HttpClient.postApiPriorityLists(priorityList);
+      } catch (error) {
+        console.error(error);
+        // generate temporary id when it fails
+        priorityList.id = nextId(state.projects);
+      }
+      commit("addPriorityList", priorityList);
+      return priorityList as PriorityList;
+    },
     async addBoard({ commit, state }, board: Create<Board>): Promise<Board> {
       try {
         board = await HttpClient.postApiBoards(board);
@@ -489,6 +524,10 @@ export default createStore({
       // TODO: add newly added checkitems
       const checkLists = await sync(HttpClient.getApiCheckLists(), Object.values(state.checkLists).flat(), value => HttpClient.postApiCheckLists(value));
       commit("setCheckLists", checkLists);
+
+      // TODO: add newly added priorityitems
+      const priorityLists = await sync(HttpClient.getApiPriorityLists(), Object.values(state.priorityLists).flat(), value => HttpClient.postApiPriorityLists(value));
+      commit("setPriorityLists", priorityLists);
     }
   },
   modules: {}

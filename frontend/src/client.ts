@@ -153,6 +153,16 @@ const api = {
             path: "api/labels/{id}/"
         },
     },
+    "api_priorityLists_": {
+        get: {
+            method: Methods.get,
+            path: "api/priorityLists/"
+        },
+        post: {
+            method: Methods.post,
+            path: "api/priorityLists/"
+        },
+    },
     "api_checkLists_": {
         get: {
             method: Methods.get,
@@ -255,6 +265,19 @@ export interface Task extends Entity {
     parent_task?: Task | null;
     categories: number[];
     labels: number[];
+    priority: number;
+}
+
+export interface Priority extends Entity {
+    title: string;
+    value: number;
+}
+
+export interface PriorityList extends Entity {
+    title: string;
+    items: Priority[];
+    project: number;
+    default: number;
 }
 
 export interface Category extends Entity {
@@ -428,6 +451,14 @@ export const HttpClient = {
 
     putApiCheckItemsbyId(value: CheckItem): Promise<CheckItem> {
         return this.queryServer(api["api_checkItems_{id}_"].put, value);
+    },
+
+    getApiPriorityLists(): Promise<PriorityList[]> {
+        return this.queryServer(api.api_priorityLists_.get);
+    },
+
+    postApiPriorityLists(value: Create<PriorityList>): Promise<PriorityList> {
+        return this.queryServer(api.api_priorityLists_.post, value);
     },
 
     getApiCheckLists(): Promise<CheckList[]> {

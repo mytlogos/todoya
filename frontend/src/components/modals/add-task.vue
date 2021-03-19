@@ -345,7 +345,8 @@ export default defineComponent({
                     location: this.location,
                     parent_task: this.parentTask?.id,
                     categories: [],
-                    labels: this.labels.map(value => value.id)
+                    labels: this.labels.map(value => value.id),
+                    priority: 3
                 } as Create<Task>)) as Task;
 
                 if (
