@@ -297,7 +297,12 @@ export default defineComponent({
             dueTime: null as null | any,
             location: task?.location || "",
             parentTask: task?.parent_task as null | Task,
-            labels: [] as Label[],
+            labels:
+                task?.labels.map(labelId => {
+                    return this.$store.state.labels.find(
+                        label => label.id === labelId
+                    ) as Label;
+                }) || [],
             reminderValue: null as null | number,
             reminderUnit: TimeUnit.DAY,
             possibleReminder: [
@@ -322,9 +327,11 @@ export default defineComponent({
     },
     computed: {
         priority(): Priority {
-            return this.$store.getters.getPriorities(this.task?.project).find(
-                (value: Priority) => value.id === this.priorityId
-            ) as Priority;
+            return this.$store.getters
+                .getPriorities(this.task?.project)
+                .find(
+                    (value: Priority) => value.id === this.priorityId
+                ) as Priority;
         },
         priorityList(): Priority[] {
             return this.$store.getters.getPriorities(this.task?.project);
@@ -356,7 +363,7 @@ export default defineComponent({
                 }
             });
         },
-        task(task) {
+        task(task: Task | undefined) {
             this.name = task?.title || "";
             this.project = task?.project;
             this.board = task?.board;
@@ -365,6 +372,12 @@ export default defineComponent({
             this.parentTask = task?.parent_task as null | Task;
             this.checkLists = getCheckLists(this.$store.getters, this.taskId);
             this.priorityId = task?.priority || 3;
+            this.labels =
+                task?.labels.map(labelId => {
+                    return this.$store.state.labels.find(
+                        label => label.id === labelId
+                    ) as Label;
+                }) || [];
         },
         startDate() {
             // automatically set time to 0:00 if not set yet
