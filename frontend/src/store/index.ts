@@ -320,7 +320,7 @@ export default createStore({
       }
     },
     updateCheckItem(state, value: CheckItem) {
-      const list = findCheckList(state.checkLists, value.id);
+      const list = findCheckList(state.checkLists, value.list);
 
       if (list) {
         const index = list.items.findIndex(item => item.id === value.id);
@@ -330,6 +330,8 @@ export default createStore({
         } else {
           Object.assign(list.items[index], value);
         }
+      } else {
+        console.error("Cannot update CheckItem, its Checklist does not exist in store");
       }
     },
     removeCheckItem(state, value: CheckItem) {
