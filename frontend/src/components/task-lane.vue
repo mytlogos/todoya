@@ -28,7 +28,17 @@
                         :id="id"
                     ></button>
                     <div class="dropdown-menu" :aria-labelledby="id">
-                        <a class="dropdown-item" href="#">Action</a>
+                        <a
+                            v-for="item in boardActions"
+                            :key="item.title"
+                            class="dropdown-item"
+                            href="#"
+                            @click="toggleAction(item)"
+                            :class="{ 'pl-1': item.isActive }"
+                        >
+                            <i v-if="item.isActive" class="fas fa-check"></i>
+                            {{ item.title }}
+                        </a>
                         <a class="dropdown-item" href="#">Another action</a>
                         <a class="dropdown-item" href="#"
                             >Something else here</a
@@ -51,12 +61,20 @@
 </template>
 
 <script lang="ts">
-import { Board, Priority, Task } from "@/client";
+import { Action, Board, Create, Priority, Task } from "@/client";
 import { defineComponent, PropType } from "vue";
 import BoardItem from "./BoardItem.vue";
 import VueDraggable from "vuedraggable";
 import { AddTaskModal } from "@/siteTypes";
 import EditableText from "./editable-text.vue";
+import { Actions, Condition } from "@/actions";
+
+interface BoardAction {
+    title: string;
+    condition: Condition;
+    action: keyof typeof Actions;
+    isActive: boolean;
+}
 
 export default defineComponent({
     name: "TaskLane",
@@ -69,7 +87,15 @@ export default defineComponent({
     },
     data() {
         return {
-            title: this.board.title
+            title: this.board.title,
+            boardActions: [
+                {
+                    title: "Set as Done Board",
+                    condition: Condition.MOVING_TO,
+                    action: "set_completion_date_to_now",
+                    isActive: false
+                }
+            ] as BoardAction[]
         };
     },
     computed: {
@@ -100,9 +126,34 @@ export default defineComponent({
     watch: {
         "board.title"(title) {
             this.title = title;
+        },
+        "$store.state.actions"(actions) {
+            const boardActions = actions[this.board.id];
+
+            if (boardActions) {
+                this.boardActions.forEach(item => {
+                    item.isActive = !!boardActions.find(
+                        (action: Action) =>
+                            action.condition == item.condition &&
+                            action.action === item.action
+                    );
+                });
+            }
         }
     },
     methods: {
+        toggleAction(action: BoardAction) {
+            if (!action.isActive) {
+                this.$store
+                    .dispatch("addAction", {
+                        condition: action.condition,
+                        action: action.action,
+                        board: this.board.id
+                    } as Create<Action>)
+                    .then(() => (action.isActive = false))
+                    .catch(console.error);
+            }
+        },
         updateBoardTitle() {
             if (this.title === this.board.title) {
                 return;

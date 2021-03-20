@@ -1,4 +1,5 @@
-import { Board, Category, CheckList, CheckItem, Create, Entity, HttpClient, Label, Project, Reminder, reyhydrateDate, Task, Priority, PriorityList } from "@/client";
+import { Actions, BoardActionsPlugin, Condition } from "@/actions";
+import { Board, Category, CheckList, CheckItem, Create, Entity, HttpClient, Label, Project, Reminder, reyhydrateDate, Task, Priority, PriorityList, Action } from "@/client";
 import { VuexStore } from "@/siteTypes";
 import { Commit, createLogger, createStore, Dispatch } from "vuex";
 import persistedState from "vuex-persistedstate";
@@ -93,6 +94,7 @@ export default createStore({
         reyhydrateDate(store.state.reminders, "when");
       }
     }),
+    BoardActionsPlugin()
   ],
   state: (): VuexStore => ({
     projects: [],
@@ -109,6 +111,7 @@ export default createStore({
     addTaskModal: null,
     checkLists: {},
     priorityLists: {},
+    actions: {},
   }),
   getters: {
     getBoards: (state) => (projectId: number): Board[] => {
@@ -133,8 +136,11 @@ export default createStore({
     getBoard: (state) => (id: number): undefined | Board => {
       return state.boards.find(value => id === value.id);
     },
-    getCheckLists: (state) => (id: number): undefined | CheckList[] => {
+    getCheckLists: (state) => (id: number): CheckList[] => {
       return state.checkLists[id] || [];
+    },
+    getActions: (state) => (id: number): Action[] => {
+      return state.actions[id] || [];
     },
     getPriorities: (state) => (projectId: number): Priority[] => {
       return state.priorityLists[projectId]?.items || [];
@@ -276,6 +282,42 @@ export default createStore({
     removePriorityList(state, value: PriorityList) {
       delete state.priorityLists[value.project];
     },
+    setActions(state, actions: Action[]) {
+      const mapping: Record<number, Action[]> = {};
+      actions.forEach(value => (mapping[value.board] || (mapping[value.board] = [])).push(value));
+      state.actions = mapping;
+    },
+    addAction(state, value: Action) {
+      const actions = state.actions[value.board] || (state.actions[value.board] = []);
+
+      if (actions.find(other => other.id === value.id)) {
+        console.warn("Do not add duplicate checklist")
+        return;
+      }
+      actions.push(value);
+    },
+    updateAction(state, value: Action) {
+      const checklists = state.actions[value.board];
+
+      let found;
+
+      if (checklists) {
+        found = checklists.find(other => other.id === value.id);
+      }
+
+      if (found) {
+        Object.assign(found, value);
+      } else {
+        console.warn("Cannot update checklist, does not exist in store");
+      }
+    },
+    removeAction(state, value: Action) {
+      const checklists = state.actions[value.board];
+
+      if (checklists) {
+        removeEntity(checklists, value.id);
+      }
+    },
     setCheckLists(state, checkLists: CheckList[]) {
       const mapping: Record<number, CheckList[]> = {};
       checkLists.forEach(value => (mapping[value.task] || (mapping[value.task] = [])).push(value));
@@ -354,19 +396,29 @@ export default createStore({
       commit("addTask", task);
       return task as Task;
     },
-    async updateTask({ commit }, task: Task): Promise<Task | null> {
-      try {
-        await HttpClient.putApiTasksbyId(task);
-        commit("updateTask", task);
-        return task;
-      } catch (error) {
-        console.error(error);
-        return null;
-      }
+    async updateTask({ commit }, task: Task): Promise<Task> {
+      await HttpClient.putApiTasksbyId(task);
+      commit("updateTask", task);
+      return task;
     },
     async deleteTask({ commit }, taskId: number): Promise<void> {
       await HttpClient.deleteApiTasksbyId(taskId);
       commit("removeTask", taskId);
+    },
+    async addAction({ commit }, action: Create<Action>): Promise<Action> {
+      const createdAction = await HttpClient.postApiActions(action);
+      action.id = createdAction.id;
+      commit("addAction", action);
+      return action as Action;
+    },
+    async updateAction({ commit }, action: Action): Promise<Action> {
+      await HttpClient.putApiActionsbyId(action);
+      commit("updateAction", action);
+      return action;
+    },
+    async deleteAction({ commit }, action: Action): Promise<void> {
+      await HttpClient.deleteApiActionsbyId(action.id);
+      commit("removeAction", action);
     },
     async addCheckList({ commit }, checkList: Create<CheckList>): Promise<CheckList> {
       const createdList = await HttpClient.postApiCheckLists(checkList);
@@ -530,6 +582,10 @@ export default createStore({
       // TODO: add newly added priorityitems
       const priorityLists = await sync(HttpClient.getApiPriorityLists(), Object.values(state.priorityLists).flat(), value => HttpClient.postApiPriorityLists(value));
       commit("setPriorityLists", priorityLists);
+
+      // TODO: add newly added actions
+      const actions = await sync(HttpClient.getApiActions(), Object.values(state.actions).flat(), value => HttpClient.postApiActions(value));
+      commit("setActions", actions);
     }
   },
   modules: {}

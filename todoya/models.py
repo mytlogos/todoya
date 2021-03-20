@@ -63,3 +63,9 @@ class CheckItem(models.Model):
 class Reminder(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     when = models.DateTimeField()
+
+
+class Action(models.Model):
+    condition = models.TextField()
+    action = models.TextField()
+    board = models.ForeignKey(Board, on_delete=models.CASCADE)

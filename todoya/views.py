@@ -90,3 +90,12 @@ class PriorityListViewSet(viewsets.ModelViewSet):
 
     queryset = models.PriorityList.objects.all()
     serializer_class = serializers.PriorityListSerializer
+
+
+class ActionViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+
+    queryset = models.Action.objects.all()
+    serializer_class = serializers.ActionSerializer

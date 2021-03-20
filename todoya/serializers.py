@@ -1,5 +1,5 @@
 from .models import (
-    Board,
+    Action, Board,
     CheckItem,
     CheckList,
     Label,
@@ -75,3 +75,9 @@ class PriorityListSerializer(serializers.ModelSerializer):
     class Meta:
         model = PriorityList
         fields = ["id", "title", "items", "project", "default"]
+
+
+class ActionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Action
+        fields = "__all__"

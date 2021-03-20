@@ -1,3 +1,5 @@
+import { Condition, Actions } from "./actions";
+
 /**
  * Allowed Methods for the API.
  */
@@ -211,6 +213,30 @@ const api = {
             path: "api/checkItems/{id}/"
         },
     },
+    "api_actions_": {
+        get: {
+            method: Methods.get,
+            path: "api/actions/"
+        },
+        post: {
+            method: Methods.post,
+            path: "api/actions/"
+        },
+    },
+    "api_actions_{id}_": {
+        delete: {
+            method: Methods.delete,
+            path: "api/actions/{id}/"
+        },
+        get: {
+            method: Methods.get,
+            path: "api/actions/{id}/"
+        },
+        put: {
+            method: Methods.put,
+            path: "api/actions/{id}/"
+        },
+    },
 };
 
 export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
@@ -278,6 +304,12 @@ export interface PriorityList extends Entity {
     items: Priority[];
     project: number;
     default: number;
+}
+
+export interface Action extends Entity {
+    condition: Condition;
+    action: keyof typeof Actions;
+    board: number;
 }
 
 export interface Category extends Entity {
@@ -431,6 +463,26 @@ export const HttpClient = {
 
     putApiLabelsbyId(value: Label): Promise<unknown> {
         return this.queryServer(api["api_labels_{id}_"].put, value);
+    },
+
+    getApiActions(): Promise<Action[]> {
+        return this.queryServer(api.api_actions_.get);
+    },
+
+    postApiActions(value: Create<Action>): Promise<Action> {
+        return this.queryServer(api.api_actions_.post, value);
+    },
+
+    deleteApiActionsbyId(id: number): Promise<void> {
+        return this.queryServer(api["api_actions_{id}_"].delete, { id });
+    },
+
+    getApiActionsbyId(id: number): Promise<Action> {
+        return this.queryServer(api["api_actions_{id}_"].get, { id });
+    },
+
+    putApiActionsbyId(value: Action): Promise<Action> {
+        return this.queryServer(api["api_actions_{id}_"].put, value);
     },
 
     getApiCheckItems(): Promise<CheckItem[]> {
