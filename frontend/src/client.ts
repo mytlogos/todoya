@@ -255,6 +255,7 @@ export interface Board extends Entity {
     title: string;
     position: number;
     project?: number;
+    sort_by: keyof Task;
 }
 
 export interface Label extends Entity {

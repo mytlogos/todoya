@@ -10,6 +10,7 @@ class Board(models.Model):
     title = models.TextField()
     position = models.IntegerField(default=0)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    sort_by = models.TextField(default="id")
 
 
 class Category(models.Model):

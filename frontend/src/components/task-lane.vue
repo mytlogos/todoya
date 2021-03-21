@@ -1,5 +1,5 @@
 <template>
-    <div class="task-lane card m-1 p-0">
+    <div class="task-lane card m-1 p-0 h-100">
         <div
             class="card-header d-flex justify-content-between align-content-center"
         >
@@ -39,7 +39,33 @@
                             <i v-if="item.isActive" class="fas fa-check"></i>
                             {{ item.title }}
                         </a>
-                        <a class="dropdown-item" href="#">Another action</a>
+                        <div
+                            class="dropdown dropright"
+                            @mouseenter="showDropdown"
+                            @mouseleave="hideDropdown"
+                        >
+                            <a
+                                ref="sortRef"
+                                class="dropdown-item"
+                                href="#"
+                                data-toggle="dropdown"
+                            >
+                                Sorted by: {{ currentSort.title }}
+                            </a>
+                            <div
+                                class="dropdown-menu"
+                                aria-labelledby="dropdownMenuButton"
+                            >
+                                <a
+                                    v-for="sort in sorter"
+                                    :key="sort.key"
+                                    class="dropdown-item"
+                                    href="#"
+                                    @click="updateSort(sort)"
+                                    >{{ sort.title }}
+                                </a>
+                            </div>
+                        </div>
                         <a class="dropdown-item" href="#"
                             >Something else here</a
                         >
@@ -68,12 +94,19 @@ import VueDraggable from "vuedraggable";
 import { AddTaskModal } from "@/siteTypes";
 import EditableText from "./editable-text.vue";
 import { Actions, Condition } from "@/actions";
+import $ from "jquery";
 
 interface BoardAction {
     title: string;
     condition: Condition;
     action: keyof typeof Actions;
     isActive: boolean;
+}
+
+interface Sorter {
+    title: string;
+    key: keyof Task;
+    defaultOrder: 1 | -1;
 }
 
 export default defineComponent({
@@ -95,16 +128,50 @@ export default defineComponent({
                     action: "set_completion_date_to_now",
                     isActive: false
                 }
-            ] as BoardAction[]
+            ] as BoardAction[],
+            sorter: [
+                { title: "Id", key: "id", defaultOrder: -1 },
+                { title: "Completion", key: "completion_date", defaultOrder: -1 },
+                { title: "Due", key: "due", defaultOrder: -1 },
+                { title: "Start", key: "start", defaultOrder: -1 },
+                { title: "Priority", key: "priority", defaultOrder: -1 },
+                { title: "Title", key: "title", defaultOrder: 1 }
+            ] as Sorter[]
         };
     },
     computed: {
+        currentSort(): Sorter {
+            return (
+                this.sorter.find(value => this.board.sort_by === value.key) ||
+                this.sorter[0]
+            );
+        },
         id(): string {
             return "list-setting-dropdown-" + this.board?.id;
         },
         items: {
             get(): Task[] {
-                return this.$store.getters.getBoardTasks(this.board.id);
+                return this.$store.getters
+                    .getBoardTasks(this.board.id)
+                    .sort((a: Task, b: Task) => {
+                        const valueA = a[this.currentSort.key];
+                        const valueB = b[this.currentSort.key];
+                        const order =  this.currentSort.defaultOrder
+
+                        if (valueA && valueB) {
+                            return valueA < valueB
+                                ? -1 * order
+                                : valueB < valueA
+                                ? 1 * order
+                                : 0;
+                        } else if (!valueA && valueB) {
+                            return -1 * order;
+                        } else if (valueA && !valueB) {
+                            return 1 * order;
+                        } else {
+                            return 0;
+                        }
+                    });
             },
             set(items: Task[]) {
                 this.$store.dispatch("updateBoardTasks", {
@@ -141,7 +208,21 @@ export default defineComponent({
             }
         }
     },
+    mounted() {
+        $(this.$refs.sortRef as HTMLElement).dropdown();
+    },
     methods: {
+        hideDropdown() {
+            $(this.$refs.sortRef as HTMLElement).dropdown("hide");
+        },
+        showDropdown() {
+            $(this.$refs.sortRef as HTMLElement).dropdown("show");
+        },
+        updateSort(sorter: Sorter) {
+            this.$store
+                .dispatch("updateBoard", { ...this.board, sort_by: sorter.key })
+                .catch(console.error);
+        },
         toggleAction(action: BoardAction) {
             if (!action.isActive) {
                 this.$store
