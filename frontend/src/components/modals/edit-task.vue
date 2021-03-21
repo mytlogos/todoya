@@ -382,8 +382,8 @@ export default defineComponent({
 
             this.reset("startDate", (task?.start && toIsoDateString(task.start as Date)) || null);
             this.reset("startTime", (task?.start && toIsoTimeString(task.start as Date)) || null);
-            this.reset("dueDate", (task?.due && toIsoDateString(task.start as Date)) || null);
-            this.reset("dueTime", (task?.due && toIsoTimeString(task.start as Date)) || null);
+            this.reset("dueDate", (task?.due && toIsoDateString(task.due as Date)) || null);
+            this.reset("dueTime", (task?.due && toIsoTimeString(task.due as Date)) || null);
         },
         startDate() {
             // automatically set time to 0:00 if not set yet
