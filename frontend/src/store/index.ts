@@ -84,6 +84,33 @@ function updateEntity<T extends Entity>(entities: T[], entity: T) {
   }
 }
 
+function removeBoard(state: VuexStore, board: Board) {
+  delete state.actions[board.id];
+  removeEntity(state.boards, board.id);
+}
+
+function removeReminder(state: VuexStore, reminder: Reminder) {
+  const notification = state.reminderNotifications[reminder.id];
+  clearTimeout(notification?.timeoutId);
+  removeEntity(state.reminders[reminder.task] || [], reminder.id);
+}
+
+function removeTask(state: VuexStore, task: Task) {
+  const reminders = state.reminders[task.id];
+
+  // remove all current reminders to reduce unnecessary array splices
+  delete state.reminders[task.id];
+
+  if (reminders) {
+    reminders.forEach(reminder => removeReminder(state, reminder));
+  }
+
+  // remove all task checklists and its items
+  delete state.checkLists[task.id];
+
+  removeEntity(state.tasks, task.id);
+}
+
 export default createStore({
   devtools: true,
   plugins: [
@@ -168,6 +195,28 @@ export default createStore({
       updateEntity(state.projects, project);
     },
     removeProject(state, project: Project) {
+      // remove boards and associated data
+      state.boards
+        .filter(board => board.project === project.id)
+        .forEach(board => removeBoard(state, board));
+
+      const removedTasks = [] as Task[];
+
+      // remove tasks
+      state.tasks = state.tasks.filter(task => {
+        if (task.project === project.id) {
+          removedTasks.push(task);
+          return true;
+        } else {
+          return false;
+        }
+      });
+      removedTasks.forEach(task => removeTask(state, task));
+
+      // remove priority list
+      delete state.priorityLists[project.id];
+
+      // remove project itself
       remove(state.projects, project);
     },
     toggleProjectSelect(state, { project, multi }: { project: Project, multi: boolean }) {
@@ -194,9 +243,15 @@ export default createStore({
     },
     removeTask(state, task: Task | number) {
       if (Number.isInteger(task)) {
-        removeEntity(state.tasks, task as number);
+        const found = state.tasks.find(value => value.id === task);
+
+        if (!found) {
+          throw Error("Task not found: " + task);
+        }
+
+        removeTask(state, found);
       } else {
-        remove(state.tasks, task);
+        removeTask(state, task as Task);
       }
     },
     updateTask(state, task: Task) {
@@ -212,7 +267,7 @@ export default createStore({
       updateEntity(state.boards, board);
     },
     removeBoard(state, board: Board) {
-      remove(state.boards, board);
+      removeBoard(state, board);
     },
     setCategories(state, values: Category[]) {
       state.categories = values;
