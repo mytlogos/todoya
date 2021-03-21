@@ -26,7 +26,7 @@
                 </button>
             </div>
         </div>
-        <div class="container">
+        <div class="calendar container">
             <div class="row">
                 <div
                     v-for="weekDay of weekDays"
@@ -159,21 +159,21 @@ export default defineComponent({
 </script>
 
 <style>
-.week-cell {
+.calendar .week-cell {
     height: 10em;
 }
-.day-cell {
+.calendar .day-cell {
     width: 10em;
     border-right: 1px solid lightgrey;
     border-bottom: 1px solid lightgrey;
 }
-.day-cell.past {
+.calendar .day-cell.past {
     background-color: #e8e8e8 !important;
 }
-.day-cell.today {
+.calendar .day-cell.today {
     background-color: cornsilk !important;
 }
-.task {
+.calendar .task {
     display: block;
     color: white;
     background-color: #dc3545;
@@ -181,10 +181,10 @@ export default defineComponent({
     padding-left: 0.6em;
     border-radius: 10rem;
 }
-.past > .task {
+.calendar .past > .task {
     opacity: 0.5;
 }
-.task ~ .task {
+.calendar .task ~ .task {
     margin-top: 2px;
 }
 /* For a single Task over its current and parent-sibling days */
