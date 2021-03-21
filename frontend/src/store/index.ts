@@ -74,6 +74,16 @@ function findCheckList(checkLists: Record<number, CheckList[]>, checkListId: num
   }
 }
 
+function updateEntity<T extends Entity>(entities: T[], entity: T) {
+  const found = entities.find(value => entity.id === value.id);
+
+  if (found) {
+    Object.assign(found, entity);
+  } else {
+    throw Error("Cannot update Update, does not exist: " + JSON.stringify(entity));
+  }
+}
+
 export default createStore({
   devtools: true,
   plugins: [
@@ -109,6 +119,7 @@ export default createStore({
     editTask: null,
     confirmationModal: null,
     addTaskModal: null,
+    editProjectModal: null,
     checkLists: {},
     priorityLists: {},
     actions: {},
@@ -153,6 +164,9 @@ export default createStore({
     addProject(state, project: Project) {
       state.projects.push(project);
     },
+    updateProject(state, project: Project) {
+      updateEntity(state.projects, project);
+    },
     removeProject(state, project: Project) {
       remove(state.projects, project);
     },
@@ -186,13 +200,7 @@ export default createStore({
       }
     },
     updateTask(state, task: Task) {
-      const found = state.tasks.find(value => task.id === value.id);
-
-      if (found) {
-        Object.assign(found, task);
-      } else {
-        throw Error("Cannot update Task, does not exist");
-      }
+      updateEntity(state.tasks, task);
     },
     setBoards(state, boards: Board[]) {
       state.boards = boards;
@@ -201,12 +209,7 @@ export default createStore({
       state.boards.push(board);
     },
     updateBoard(state, board: Board) {
-      const found = state.boards.find(value => value.id === board.id);
-
-      if (!found) {
-        throw Error("Cannot update Board, does not exist");
-      }
-      Object.assign(found, board);
+      updateEntity(state.boards, board);
     },
     removeBoard(state, board: Board) {
       remove(state.boards, board);
@@ -261,6 +264,9 @@ export default createStore({
     },
     setAddTaskModal(state, value: any) {
       state.addTaskModal = value;
+    },
+    setEditProjectModal(state, value: any) {
+      state.editProjectModal = value;
     },
     setPriorityLists(state, priorityLists: PriorityList[]) {
       const mapping: Record<number, PriorityList> = {};
@@ -474,6 +480,15 @@ export default createStore({
       }
       commit("addProject", project);
       return project as Project;
+    },
+    async updateProject({ commit }, project: Project): Promise<Project> {
+      await HttpClient.putApiProjectsbyId(project);
+      commit("updateProject", project);
+      return project;
+    },
+    async deleteProject({ commit }, project: Project): Promise<void> {
+      await HttpClient.deleteApiProjectsbyId(project.id);
+      commit("removeProject", project);
     },
     async addPriorityList({ commit, state }, priorityList: Create<PriorityList>): Promise<PriorityList> {
       try {

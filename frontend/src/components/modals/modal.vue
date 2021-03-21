@@ -20,21 +20,23 @@
                     <slot name="body" />
                 </div>
                 <div class="modal-footer">
-                    <button
-                        type="button"
-                        class="btn btn-secondary"
-                        data-dismiss="modal"
-                        @click.left="$emit('close')"
-                    >
-                        <slot name="close">Close</slot>
-                    </button>
-                    <button
-                        type="button"
-                        class="btn btn-primary"
-                        @click.left="$emit('submit')"
-                    >
-                        <slot name="submit">Save</slot>
-                    </button>
+                    <slot name="footer" :close="() => $emit('close')" :submit="() => $emit('submit')">
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-dismiss="modal"
+                            @click.left="$emit('close')"
+                        >
+                            <slot name="close">Close</slot>
+                        </button>
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            @click.left="$emit('submit')"
+                        >
+                            <slot name="submit">Save</slot>
+                        </button>
+                    </slot>
                 </div>
             </div>
         </div>

@@ -26,6 +26,7 @@ export interface VuexStore {
     editTask: null | number;
     confirmationModal: null | ConfirmationModal;
     addTaskModal: null | AddTaskModal | boolean;
+    editProjectModal: null | number;
     checkLists: Record<number, CheckList[]>;
     priorityLists: Record<number, PriorityList>;
     actions: Record<number, Action[]>;

@@ -64,24 +64,36 @@
                     "
                     @click.left.prevent="toggle(project, $event)"
                     href="#"
-                    class="list-group-item list-group-item-action"
+                    class="project list-group-item list-group-item-action d-flex justify-content-between"
                 >
                     {{ project.title }}
+                    <i
+                        class="fas fa-edit btn my-n1"
+                        role="button"
+                        title="Edit Project"
+                        @click.stop="editProject(project)"
+                        aria-label="hide"
+                    />
                 </a>
             </ul>
         </div>
         <div class="bg-light flex-fill">
             <router-view />
         </div>
+        <teleport to="body">
+            <edit-project />
+        </teleport>
     </div>
 </template>
 
 <script lang="ts">
 import { Project, Task } from "@/client";
+import editProject from "@/components/modals/edit-project.vue";
 import { defineComponent } from "vue";
 import { mapState } from "vuex";
 
 export default defineComponent({
+    components: { editProject },
     name: "Home",
     data() {
         return {
@@ -153,6 +165,9 @@ export default defineComponent({
                 multi: event.ctrlKey
             });
         },
+        editProject(project: Project) {
+            this.$store.commit("setEditProjectModal", project.id);
+        },
         withinTimeBoundary(after: Date, before: Date, task: Task) {
             return (
                 ((task.start && task.start > after) ||
@@ -165,6 +180,21 @@ export default defineComponent({
 });
 </script>
 <style>
+.left-sidebar .project > .fa-edit {
+    display: none;
+}
+.left-sidebar .project:hover > .fa-edit {
+    display: unset;
+}
+.left-sidebar .project.active > .fa-edit {
+    color: white;
+}
+.left-sidebar .project.active > .fa-edit:hover {
+    background-color: #095fbb;
+}
+.left-sidebar .project > .fa-edit:hover {
+    background-color: #acacac;
+}
 .left-sidebar {
     border-right: 5px solid rgba(0, 0, 0, 0.1);
     width: 10vw;

@@ -344,8 +344,8 @@ export const HttpClient = {
         return this.queryServer(api.api_projects_.post, value);
     },
 
-    deleteApiProjectsbyId(): Promise<void> {
-        return this.queryServer(api["api_projects_{id}_"].delete);
+    deleteApiProjectsbyId(id: number): Promise<void> {
+        return this.queryServer(api["api_projects_{id}_"].delete, { id });
     },
 
     getApiProjectsbyId(id: number): Promise<Project> {
