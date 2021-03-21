@@ -3,7 +3,7 @@
         id="edit-task-modal"
         :show="show"
         @submit="submitted"
-        @close="$emit('close')"
+        @close="close"
         @keyup.enter.ctrl="submitted"
     >
         <template v-slot:title>
@@ -243,12 +243,13 @@
 
 <script lang="ts">
 import { Board, CheckItem, CheckList, Label, Priority, Task } from "@/client";
-import { defineComponent } from "vue";
+import { defineComponent, nextTick, PropType } from "vue";
 import modal from "./modal.vue";
 import $ from "jquery";
 import AddLabel from "./add-label.vue";
 import checkList from "../check-list.vue";
 import priority from "../priority.vue";
+import { toIsoDateString, toIsoTimeString } from "@/tools";
 
 enum TimeUnit {
     SECOND = 1,
@@ -291,10 +292,10 @@ export default defineComponent({
             project: task?.project,
             board: task?.board,
             description: task?.description || "",
-            startDate: null as null | any,
-            startTime: null as null | any,
-            dueDate: null as null | any,
-            dueTime: null as null | any,
+            startDate: null as null | string,
+            startTime: null as null | string,
+            dueDate: null as null | string,
+            dueTime: null as null | string,
             location: task?.location || "",
             parentTask: task?.parent_task as null | Task,
             labels:
@@ -378,6 +379,11 @@ export default defineComponent({
                         label => label.id === labelId
                     ) as Label;
                 }) || [];
+
+            this.reset("startDate", (task?.start && toIsoDateString(task.start as Date)) || null);
+            this.reset("startTime", (task?.start && toIsoTimeString(task.start as Date)) || null);
+            this.reset("dueDate", (task?.due && toIsoDateString(task.start as Date)) || null);
+            this.reset("dueTime", (task?.due && toIsoTimeString(task.start as Date)) || null);
         },
         startDate() {
             // automatically set time to 0:00 if not set yet
@@ -393,6 +399,41 @@ export default defineComponent({
         }
     },
     methods: {
+        /**
+         * If a time or date input does not have a complete input (only hours but no minutes) then it has no value yet.
+         * So setting a new value on property, does not change the input, if the property itself did not change.
+         * 
+         * If the value differs, it is set immediately.
+         * If the new value does not differ from current, it is first set to a default value and 
+         * in the next tick to the new value, to purge any incomplete changes in the input element.
+         */
+        reset(key: "dueDate" | "dueTime" | "startDate" | "startTime", value: string | null) {
+            if (this[key] !== value) {
+                this[key] = value;
+                return;
+            }
+            if (key === "dueTime" || key === "startTime") {
+                if (value === "0:00") {
+                    this[key] = "0:01";
+                } else {
+                    this[key] = "0:00";
+                }
+            } else {
+                this[key] = "0000-01-01";
+            }
+            nextTick(() => this[key] = value);
+        },
+        close() {
+            this.name = "";
+            this.description = "";
+            this.labels = [];
+            this.checkLists = [];
+            this.dueDate = null;
+            this.dueTime = null;
+            this.startDate = null;
+            this.startTime = null;
+            this.$emit("close");
+        },
         addCheckList() {
             this.checkLists.push({
                 id: 0,
@@ -410,10 +451,17 @@ export default defineComponent({
                 this.labels.push(label);
             }
         },
-        getDate(dateString: string, timeString: string): Date | undefined {
+        getDate(
+            dateString: string | null,
+            timeString: string | null
+        ): Date | undefined {
             let date;
             try {
                 date = new Date(dateString + "T" + timeString);
+
+                if (Number.isNaN(date.getDate())) {
+                    return;
+                }
             } catch {
                 // invalid string are not reported to user
                 console.log(
@@ -467,11 +515,6 @@ export default defineComponent({
                 //         } as Create<Reminder>);
                 //     }
                 // }
-
-                this.name = "";
-                this.description = "";
-                this.labels = [];
-                this.checkLists = [];
 
                 this.$emit("finish");
                 this.$emit("close");
