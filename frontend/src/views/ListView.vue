@@ -4,9 +4,10 @@
         <div class="d-flex h-100">
             <div class="left-sidebar">
                 <ul class="list-group list-group-flush">
-                    <li
+                    <board-item
                         v-for="task in tasks"
                         :key="task.id"
+                        :item="task"
                         @click.left="selectedTaskId = task.id"
                         @click.right.prevent.stop="
                             onContextClick($event, task.id)
@@ -14,9 +15,7 @@
                         class="list-group-item list-group-item-action"
                         :class="{ active: selectedTaskId === task.id }"
                         role="button"
-                    >
-                        {{ task.title }}
-                    </li>
+                    />
                 </ul>
             </div>
             <task-item class="flex-fill" :taskId="selectedTaskId" />
@@ -28,6 +27,7 @@
 import { Task } from "@/client";
 import ContextMenu, { ContextMenuItem } from "@/components/context-menu.vue";
 import taskItem from "@/components/task-item.vue";
+import BoardItem from "@/components/BoardItem.vue";
 import { ConfirmationModal } from "@/siteTypes";
 import { defineComponent } from "vue";
 
@@ -40,7 +40,7 @@ export enum TimeView {
 
 export default defineComponent({
     name: "ListView",
-    components: { taskItem, ContextMenu },
+    components: { taskItem, ContextMenu, BoardItem },
     props: {
         view: { type: Number, required: true }
     },
@@ -95,10 +95,10 @@ export default defineComponent({
                 return (
                     (!after ||
                         (task.start && task.start > after) ||
-                            (task.due && task.due > after)) &&
+                        (task.due && task.due > after)) &&
                     (!before ||
                         (task.start && task.start < before) ||
-                            (task.due && task.due < before))
+                        (task.due && task.due < before))
                 );
             });
         },

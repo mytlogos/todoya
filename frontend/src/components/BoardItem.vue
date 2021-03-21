@@ -53,16 +53,12 @@ export default defineComponent({
     components: { priority },
     name: "BoardItem",
     props: {
-        item: {
-            type: Object as PropType<Task>,
-            required: true
-        },
-        priorityList: {
-            type: Array as PropType<Priority[]>,
-            required: true
-        }
+        item: { type: Object as PropType<Task>, required: true }
     },
     computed: {
+        priorityList(): Priority[] {
+            return this.$store.getters.getPriorities(this.item.project);
+        },
         dueIconLabel(): string {
             const date = this.item.due as Date | undefined;
             if (!date) {
